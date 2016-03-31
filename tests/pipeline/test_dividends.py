@@ -161,26 +161,26 @@ next_amounts = [['NaN', 1, 15, 'NaN'],
 
 def get_vals_for_dates(zip_date_index_with_vals,
                        vals,
-                       date_invervals,
+                       date_intervals,
                        dates):
     return pd.DataFrame({
         0: get_values_for_date_ranges(zip_date_index_with_vals,
                                       vals[0],
-                                      date_invervals[0],
+                                      date_intervals[0],
                                       dates),
         1: get_values_for_date_ranges(zip_date_index_with_vals,
                                       vals[1],
-                                      date_invervals[1],
+                                      date_intervals[1],
                                       dates),
         2: get_values_for_date_ranges(zip_date_index_with_vals,
                                       vals[2],
-                                      date_invervals[2],
+                                      date_intervals[2],
                                       dates),
         # Assume the latest of 2 cash values is used if we find out about 2
         # announcements that happened on the same day for the same sid.
         3: get_values_for_date_ranges(zip_date_index_with_vals,
                                       vals[3],
-                                      date_invervals[3],
+                                      date_intervals[3],
                                       dates),
         4: zip_date_index_with_vals(dates, ['NaN'] * len(dates)),
     }, index=dates)
