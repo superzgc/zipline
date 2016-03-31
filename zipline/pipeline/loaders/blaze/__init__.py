@@ -1,4 +1,4 @@
-
+from ._13d_filings import _13DFilingsLoader
 from .buyback_auth import (
     BlazeCashBuybackAuthorizationsLoader,
     BlazeShareBuybackAuthorizationsLoader
@@ -19,6 +19,7 @@ from .earnings import (
 )
 
 __all__ = (
+    '_13DFilingsLoader',
     'BlazeCashBuybackAuthorizationsLoader',
     'BlazeDividendsByAnnouncementDateLoader',
     'BlazeDividendsByExDateLoader',

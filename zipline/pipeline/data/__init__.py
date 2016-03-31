@@ -1,3 +1,4 @@
+from ._13d_filings import _13DFilings
 from .buyback_auth import CashBuybackAuthorizations, ShareBuybackAuthorizations
 from .dividends import (
     DividendsByAnnouncementDate,
@@ -9,6 +10,7 @@ from .equity_pricing import USEquityPricing
 from .dataset import DataSet, Column, BoundColumn
 
 __all__ = [
+    '_13DFilings',
     'BoundColumn',
     'CashBuybackAuthorizations',
     'Column',
