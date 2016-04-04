@@ -26,7 +26,8 @@ from zipline.pipeline.loaders.utils import (
 from zipline.testing.fixtures import WithPipelineEventDataLoader
 from zipline.testing.fixtures import ZiplineTestCase
 
-date_intervals = [[None, '2014-01-04'], ['2014-01-05', '2014-01-09'],
+date_intervals = [[None, '2014-01-04'],
+                  ['2014-01-05', '2014-01-09'],
                   ['2014-01-10', None]]
 
 _13d_filngs_cases = [
@@ -43,11 +44,6 @@ _13d_filngs_cases = [
                  TS_FIELD_NAME],
         dtype='datetime64[ns]'
     ),
-]
-
-previous_vals = [
-    ['NaN', 1, 15],
-    ['NaN', 10, 20]
 ]
 
 
@@ -94,19 +90,17 @@ class _13DFilingsLoaderTestCase(WithPipelineEventDataLoader,
 
     def setup(self, dates):
         cols = {}
-        _expected_previous_num_shares = get_expected_previous_values(
-            zip_with_floats, previous_vals[0], date_intervals, dates
-        )
-        _expected_previous_percent_shares = get_expected_previous_values(
-            zip_with_floats, previous_vals[1], date_intervals, dates
-        )
         cols[
             PREVIOUS_DISCLOSURE_DATE
         ] = get_expected_previous_values(zip_with_dates,
                                          ['NaT', '2014-01-04', '2014-01-09'],
                                          date_intervals, dates)
-        cols[PREVIOUS_NUM_SHARES] = _expected_previous_num_shares
-        cols[PREVIOUS_PERCENT_SHARES] = _expected_previous_percent_shares
+        cols[PREVIOUS_NUM_SHARES] = get_expected_previous_values(
+            zip_with_floats, ['NaN', 1, 15], date_intervals, dates
+        )
+        cols[PREVIOUS_PERCENT_SHARES] = get_expected_previous_values(
+            zip_with_floats, ['NaN', 10, 20], date_intervals, dates
+        )
         cols[DAYS_SINCE_PREV_DISCLOSURE] = self._compute_busday_offsets(
             cols[PREVIOUS_DISCLOSURE_DATE]
         )
