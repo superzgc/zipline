@@ -1,8 +1,6 @@
 """
 Tests for the reference loader for 13d filings.
 """
-from unittest import TestCase
-
 import pandas as pd
 
 from zipline.pipeline.common import(
