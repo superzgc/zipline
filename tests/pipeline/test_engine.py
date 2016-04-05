@@ -636,18 +636,19 @@ class SyntheticBcolzTestCase(WithAdjustmentReader,
 
     @classmethod
     def make_equity_info(cls):
-        return make_rotating_equity_info(
+        cls.equity_info = ret = make_rotating_equity_info(
             num_assets=6,
             first_start=cls.first_asset_start,
             frequency=cls.TRADING_ENV_TRADING_CALENDAR.trading_day,
             periods_between_starts=4,
             asset_lifetime=8,
         )
+        return ret
 
     @classmethod
     def make_daily_bar_data(cls):
         return make_daily_bar_data(
-            cls.asset_finder.equities_info,
+            cls.equity_info,
             cls.bcolz_daily_bar_days,
         )
 
@@ -655,7 +656,7 @@ class SyntheticBcolzTestCase(WithAdjustmentReader,
     def init_class_fixtures(cls):
         super(SyntheticBcolzTestCase, cls).init_class_fixtures()
         cls.all_asset_ids = cls.asset_finder.sids
-        cls.last_asset_end = cls.asset_finder.equities_info['end_date'].max()
+        cls.last_asset_end = cls.equity_info['end_date'].max()
         cls.pipeline_loader = USEquityPricingLoader(
             cls.bcolz_daily_bar_reader,
             cls.adjustment_reader,
@@ -722,7 +723,7 @@ class SyntheticBcolzTestCase(WithAdjustmentReader,
         expected_raw = rolling_mean(
             expected_daily_bar_values_2d(
                 dates - self.env.trading_day,
-                self.asset_finder.equities_info,
+                self.equity_info,
                 'close',
             ),
             window_length,
@@ -788,11 +789,12 @@ class ParameterizedFactorTestCase(WithTradingEnvironment, ZiplineTestCase):
 
     @classmethod
     def make_equity_info(cls):
-        return make_simple_equity_info(
+        cls.equity_info = ret = make_simple_equity_info(
             cls.sids,
             start_date=Timestamp('2015-01-31', tz='UTC'),
             end_date=Timestamp('2015-03-01', tz='UTC'),
         )
+        return ret
 
     @classmethod
     def init_class_fixtures(cls):

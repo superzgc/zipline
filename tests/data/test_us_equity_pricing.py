@@ -88,7 +88,7 @@ class BcolzDailyBarTestCase(WithBcolzDailyBarReader, ZiplineTestCase):
     @classmethod
     def make_daily_bar_data(cls):
         return make_daily_bar_data(
-            cls.asset_finder.equities_info,
+            EQUITY_INFO,
             cls.bcolz_daily_bar_days,
         )
 
@@ -103,16 +103,16 @@ class BcolzDailyBarTestCase(WithBcolzDailyBarReader, ZiplineTestCase):
 
     @property
     def assets(self):
-        return self.equities_info.index
+        return EQUITY_INFO.index
 
     def trading_days_between(self, start, end):
         return self.trading_days[self.trading_days.slice_indexer(start, end)]
 
     def asset_start(self, asset_id):
-        return asset_start(self.equities_info, asset_id)
+        return asset_start(EQUITY_INFO, asset_id)
 
     def asset_end(self, asset_id):
-        return asset_end(self.equities_info, asset_id)
+        return asset_end(EQUITY_INFO, asset_id)
 
     def dates_for_asset(self, asset_id):
         start, end = self.asset_start(asset_id), self.asset_end(asset_id)
@@ -198,7 +198,7 @@ class BcolzDailyBarTestCase(WithBcolzDailyBarReader, ZiplineTestCase):
                 result,
                 expected_daily_bar_values_2d(
                     dates,
-                    self.equities_info,
+                    EQUITY_INFO,
                     column.name,
                 )
             )

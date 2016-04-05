@@ -238,14 +238,6 @@ class WithAssetFinder(object):
         super(WithAssetFinder, cls).init_class_fixtures()
         cls.asset_finder = cls.make_asset_finder()
 
-    @classproperty
-    def equities_info(cls):
-        return cls.asset_finder.equities_info
-
-    @classproperty
-    def futures_info(cls):
-        return cls.asset_finder.futures_info
-
 
 class WithTradingEnvironment(WithAssetFinder):
     """

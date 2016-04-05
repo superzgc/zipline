@@ -284,7 +284,7 @@ class USEquityPricingLoaderTestCase(WithAdjustmentReader,
     @classmethod
     def make_daily_bar_data(cls):
         return make_daily_bar_data(
-            cls.asset_finder.equities_info,
+            EQUITY_INFO,
             cls.bcolz_daily_bar_days,
         )
 

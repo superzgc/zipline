@@ -93,7 +93,7 @@ class ClosesOnly(WithDataPortal, ZiplineTestCase):
 
     @classmethod
     def make_equity_info(cls):
-        return DataFrame.from_records([
+        cls.equity_info = ret = DataFrame.from_records([
             {
                 'sid': 1,
                 'symbol': 'A',
@@ -116,6 +116,7 @@ class ClosesOnly(WithDataPortal, ZiplineTestCase):
                 'exchange': 'TEST',
             },
         ])
+        return ret
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -139,9 +140,8 @@ class ClosesOnly(WithDataPortal, ZiplineTestCase):
     @classmethod
     def init_class_fixtures(cls):
         super(ClosesOnly, cls).init_class_fixtures()
-        equities_info = cls.asset_finder.equities_info
-        cls.first_asset_start = min(equities_info.start_date)
-        cls.last_asset_end = max(equities_info.end_date)
+        cls.first_asset_start = min(cls.equity_info.start_date)
+        cls.last_asset_end = max(cls.equity_info.end_date)
         cls.assets = cls.asset_finder.retrieve_all(cls.sids)
 
         # Add a split for 'A' on its second date.

@@ -290,30 +290,6 @@ class AssetFinder(object):
         """
         return self._retrieve_assets(sids, self.equities, Equity)
 
-    def _make_info(attr):
-        def _(self):
-            return pd.DataFrame.from_records(
-                map(
-                    methodcaller('to_dict'),
-                    self.retrieve_all(getattr(self, attr)),
-                ),
-                index='sid',
-            )
-
-        return _
-
-    equities_info = property(
-        _make_info('equities_sids'),
-        doc='A dataframe that could be fed to an AssertDBWriter for equities'
-        ' to get the same information that this asset finder has.',
-    )
-    futures_info = property(
-        _make_info('futures_sids'),
-        doc='A dataframe that could be fed to an AssertDBWriter for futures'
-        ' to get the same information that this asset finder has.',
-    )
-    del _make_info
-
     def _retrieve_equity(self, sid):
         return self.retrieve_equities((sid,))[sid]
 
