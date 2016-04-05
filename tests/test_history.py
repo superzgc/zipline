@@ -150,7 +150,7 @@ class WithHistory(WithDataPortal):
                     'symbol': 'SHORT_ASSET'
                 }
             },
-            'index',
+            orient='index',
         )
 
     @classmethod

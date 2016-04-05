@@ -130,7 +130,7 @@ class TestAPIShim(WithDataPortal, ZiplineTestCase):
                 }
                 for sid in cls.sids
             },
-            'index',
+            orient='index',
         )
 
     @classmethod

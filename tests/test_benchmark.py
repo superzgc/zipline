@@ -60,7 +60,7 @@ class TestBenchmark(WithDataPortal, ZiplineTestCase):
                     "end_date": cls.SIM_PARAMS_END + timedelta(days=1)
                 },
             },
-            'index',
+            orient='index',
         )
 
     @classmethod

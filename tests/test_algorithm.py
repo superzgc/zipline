@@ -183,7 +183,7 @@ class TestMiscellaneousAPI(WithLogger,
                  4: {'symbol': 'PLAY',
                      'start_date': '2005-01-01',
                      'end_date': '2006-01-01'}},
-                'index',
+                orient='index',
             ),
         ))
 
@@ -216,7 +216,7 @@ class TestMiscellaneousAPI(WithLogger,
                     'notice_date': pd.Timestamp('2006-09-20', tz='UTC'),
                     'expiration_date': pd.Timestamp('2006-10-20', tz='UTC')}
             },
-            'index',
+            orient='index',
         )
 
     def test_cancel_policy_outside_init(self):
@@ -984,7 +984,7 @@ class TestBeforeTradingStart(WithDataPortal,
                    "end_date": cls.SIM_PARAMS_END + timedelta(days=5),
                    "symbol": "ASSET{0}".format(sid)}
              for sid in (1, 2)},
-            'index',
+            orient='index',
         )
 
     @classmethod
@@ -1634,7 +1634,7 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
                 }
                 for sid in cls.sids
             },
-            'index',
+            orient='index',
         )
 
     @classmethod
@@ -1827,7 +1827,7 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
                     'end_date': start + timedelta(days=6)
                 },
             },
-            'index',
+            orient='index',
         )
         with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
             sim_params = factory.create_simulation_parameters(
@@ -2284,7 +2284,7 @@ class TestOrderCancelation(WithDataPortal,
                     'symbol': 'ASSET1',
                 },
             },
-            'index',
+            orient='index',
         )
 
     @classmethod
@@ -3047,7 +3047,7 @@ class TestOrderAfterDelist(WithTradingEnvironment, ZiplineTestCase):
                     'symbol': "ASSET1"
                 },
             },
-            'index',
+            orient='index',
         )
 
     @classmethod

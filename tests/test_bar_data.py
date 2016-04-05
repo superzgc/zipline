@@ -108,7 +108,7 @@ class TestMinuteBarData(WithBarDataChecks,
                     'symbol': "ASSET{0}".format(sid)
                 } for sid in [1, 2, 3, 4, 5]
             },
-            'index',
+            orient='index',
         )
 
     @classmethod
@@ -550,7 +550,7 @@ class TestDailyBarData(WithBarDataChecks,
                     'symbol': "ASSET{0}".format(sid)
                 } for sid in cls.sids
             },
-            'index',
+            orient='index',
         )
 
     @classmethod

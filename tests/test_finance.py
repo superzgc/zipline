@@ -198,7 +198,7 @@ class FinanceTestCase(WithLogger,
                     'end_date': self.end,
                 },
             },
-            'index',
+            orient='index',
         )
         with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
 

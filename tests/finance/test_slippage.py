@@ -1,7 +1,7 @@
 #
 # Copyright 2013 Quantopian, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the 'License');
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,7 +22,6 @@ import pytz
 
 from nose_parameterized import parameterized
 
-import numpy as np
 import pandas as pd
 from pandas.tslib import normalize_date
 
@@ -63,7 +62,7 @@ class SlippageTestCase(WithDataPortal, ZiplineTestCase):
                     'end_date': pd.Timestamp('2006-01-07', tz='utc')
                 }
             },
-            'index',
+            orient='index',
         )
 
     @classmethod
@@ -71,10 +70,10 @@ class SlippageTestCase(WithDataPortal, ZiplineTestCase):
         return {
             133: pd.DataFrame(
                 {
-                    'open': np.array([3.0, 3.0, 3.5, 4.0, 3.5]),
-                    'high': np.array([3.15, 3.15, 3.15, 3.15, 3.15]),
-                    'low': np.array([2.85, 2.85, 2.85, 2.85, 2.85]),
-                    'close': np.array([3.0, 3.5, 4.0, 3.5, 3.0]),
+                    'open': [3.0, 3.0, 3.5, 4.0, 3.5],
+                    'high': [3.15, 3.15, 3.15, 3.15, 3.15],
+                    'low': [2.85, 2.85, 2.85, 2.85, 2.85],
+                    'close': [3.0, 3.5, 4.0, 3.5, 3.0],
                     'volume': [2000, 2000, 2000, 2000, 2000],
                 },
                 index=cls.minutes,

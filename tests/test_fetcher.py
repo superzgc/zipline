@@ -86,7 +86,7 @@ class FetcherTestCase(WithResponses,
                     'exchange': 'nasdaq'
                 }
             },
-            'index',
+            orient='index',
         )
 
     def run_algo(self, code, sim_params=None, data_frequency="daily"):

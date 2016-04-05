@@ -607,7 +607,6 @@ class TradingAlgorithm(object):
                     self.trading_environment,
                     equity_daily_reader=equity_daily_reader)
 
-
         # Force a reset of the performance tracker, in case
         # this is a repeat run of the algorithm.
         self.perf_tracker = None

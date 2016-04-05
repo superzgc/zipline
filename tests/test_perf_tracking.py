@@ -1216,7 +1216,7 @@ class TestPositionPerformance(WithInstanceTmpDir, ZiplineTestCase):
                 }
                 for sid in futures_sids
             },
-            'index',
+            orient='index',
         )
         self.env = self.enter_instance_context(tmp_trading_env(
             equities=equities,
@@ -2426,7 +2426,7 @@ class TestPositionTracker(WithTradingEnvironment,
                 4: {'multiplier': 1000},
                 1032201401: {'multiplier': 50},
             },
-            'index',
+            orient='index',
         )
 
     def test_empty_positions(self):
