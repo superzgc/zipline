@@ -25,11 +25,11 @@ from unittest import TestCase
 import uuid
 import warnings
 
-import pandas as pd
-from pandas.util.testing import assert_frame_equal
-
+from nose.tools import raises
 from nose_parameterized import parameterized
 from numpy import full, int32, int64
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
 import sqlalchemy as sa
 
 from zipline.assets import (
@@ -77,6 +77,7 @@ from zipline.testing import (
     empty_assets_db,
     tmp_assets_db,
 )
+from zipline.testing.predicates import assert_equal
 from zipline.testing.fixtures import (
     WithAssetFinder,
     ZiplineTestCase,
@@ -315,27 +316,36 @@ class TestFuture(WithAssetFinder, ZiplineTestCase):
         cls.future2 = cls.asset_finder.lookup_future_symbol('CLG06')
 
     def test_str(self):
-        strd = self.future.__str__()
+        strd = str(self.future)
         self.assertEqual("Future(2468 [OMH15])", strd)
 
     def test_repr(self):
-        reprd = self.future.__repr__()
-        self.assertTrue("Future" in reprd)
-        self.assertTrue("2468" in reprd)
-        self.assertTrue("OMH15" in reprd)
-        self.assertTrue("root_symbol='OM'" in reprd)
-        self.assertTrue(("notice_date=Timestamp('2014-01-20 00:00:00+0000', "
-                        "tz='UTC')") in reprd)
-        self.assertTrue("expiration_date=Timestamp('2014-02-20 00:00:00+0000'"
-                        in reprd)
-        self.assertTrue("auto_close_date=Timestamp('2014-01-18 00:00:00+0000'"
-                        in reprd)
-        self.assertTrue("tick_size=0.01" in reprd)
-        self.assertTrue("multiplier=500" in reprd)
+        reprd = repr(self.future)
+        self.assertIn("Future", reprd)
+        self.assertIn("2468", reprd)
+        self.assertIn("OMH15", reprd)
+        self.assertIn("root_symbol='OM'", reprd)
+        self.assertIn(
+            "notice_date=Timestamp('2014-01-20 00:00:00+0000', tz='UTC')",
+            reprd,
+        )
+        self.assertIn(
+            "expiration_date=Timestamp('2014-02-20 00:00:00+0000'",
+            reprd,
+        )
+        self.assertIn(
+            "auto_close_date=Timestamp('2014-01-18 00:00:00+0000'",
+            reprd,
+        )
+        self.assertIn("tick_size=0.01", reprd)
+        self.assertIn("multiplier=500", reprd)
 
+    @raises(AssertionError)
     def test_reduce(self):
-        reduced = self.future.__reduce__()
-        self.assertEqual(Future, reduced[0])
+        assert_equal(
+            pickle.loads(pickle.dumps(self.future)).to_dict(),
+            self.future.to_dict(),
+        )
 
     def test_to_and_from_dict(self):
         dictd = self.future.to_dict()
