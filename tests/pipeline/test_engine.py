@@ -155,7 +155,7 @@ class ConstantInputTestCase(WithTradingEnvironment, ZiplineTestCase):
     end = Timestamp('2014-03-01', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.asset_ids,
             start_date=cls.start,
@@ -522,7 +522,7 @@ class FrameInputTestCase(WithTradingEnvironment, ZiplineTestCase):
     end = Timestamp('2015-01-31', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.asset_ids,
             start_date=cls.start,
@@ -635,7 +635,7 @@ class SyntheticBcolzTestCase(WithAdjustmentReader,
     SIM_PARAMS_END = Timestamp('2015-08-01', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_rotating_equity_info(
             num_assets=6,
             first_start=cls.first_asset_start,
@@ -787,7 +787,7 @@ class ParameterizedFactorTestCase(WithTradingEnvironment, ZiplineTestCase):
     sids = Int64Index([1, 2, 3])
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.sids,
             start_date=Timestamp('2015-01-31', tz='UTC'),

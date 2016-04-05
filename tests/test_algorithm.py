@@ -144,7 +144,7 @@ _multiprocess_can_split_ = False
 
 class TestRecordAlgorithm(WithDataPortal, ZiplineTestCase):
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         ds = cls.TRADING_ENV_TRADING_CALENDAR.trading_days
         return make_simple_equity_info(
             [133],
@@ -173,7 +173,7 @@ class TestMiscellaneousAPI(WithLogger,
     sids = 1, 2
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.concat((
             make_simple_equity_info(cls.sids, '2002-02-1', '2007-01-01'),
             pd.DataFrame.from_dict(
@@ -713,7 +713,7 @@ class TestTransformAlgorithm(WithLogger,
     sids = [0, 1, 133]
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.sids,
             cls.SIM_PARAMS_START,
@@ -931,7 +931,7 @@ class TestPositions(WithLogger,
     sids = [1, 133]
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.sids,
             cls.SIM_PARAMS_START,
@@ -978,7 +978,7 @@ class TestBeforeTradingStart(WithDataPortal,
     data_start = pd.Timestamp('2016-01-05', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {sid: {"start_date": cls.data_start,
                    "end_date": cls.SIM_PARAMS_END + timedelta(days=5),
@@ -1210,7 +1210,7 @@ class TestAlgoScript(WithLogger,
     sids = [0, 1, 3, 133]
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         data = make_simple_equity_info(
             cls.sids,
             cls.SIM_PARAMS_START,
@@ -1569,7 +1569,7 @@ class TestGetDatetime(WithLogger,
     SIM_PARAMS_END = to_utc('2014-01-03 9:31')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [0, 1],
             cls.SIM_PARAMS_START,
@@ -1625,7 +1625,7 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
     sids = 133, 134
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 sid: {
@@ -2008,7 +2008,7 @@ class TestAccountControls(WithDataPortal, ZiplineTestCase):
     sidint = 133
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [cls.sidint],
             cls.SIM_PARAMS_START,
@@ -2275,7 +2275,7 @@ class TestOrderCancelation(WithDataPortal,
     )
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 1: {
@@ -3037,7 +3037,7 @@ class TestOrderAfterDelist(WithTradingEnvironment, ZiplineTestCase):
     end = pd.Timestamp('2016-01-15', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 1: {

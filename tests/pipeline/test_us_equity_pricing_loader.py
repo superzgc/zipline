@@ -260,7 +260,7 @@ class USEquityPricingLoaderTestCase(WithAdjustmentReader,
     asset_ids = 1, 2, 3
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return EQUITY_INFO
 
     @classmethod

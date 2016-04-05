@@ -64,7 +64,7 @@ class FinanceTestCase(WithLogger,
     end = pd.Timestamp('2006-12-31', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info([1, 2, 133], cls.start, cls.end)
 
     def init_instance_fixtures(self):

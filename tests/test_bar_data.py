@@ -99,7 +99,7 @@ class TestMinuteBarData(WithBarDataChecks,
     HILARIOUSLY_ILLIQUID_ASSET_SID = 5
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 sid: {
@@ -541,7 +541,7 @@ class TestDailyBarData(WithBarDataChecks,
     ILLIQUID_DIVIDEND_ASSET_SID = 8
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 sid: {

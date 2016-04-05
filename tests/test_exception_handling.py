@@ -36,7 +36,7 @@ class ExceptionTestCase(WithDataPortal, ZiplineTestCase):
     sid = 133
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [cls.sid],
             cls.SIM_PARAMS_START,

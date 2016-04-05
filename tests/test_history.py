@@ -103,7 +103,7 @@ class WithHistory(WithDataPortal):
         )
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         jan_5_2015 = pd.Timestamp('2015-01-05', tz='UTC')
         day_after_12312015 = pd.Timestamp('2016-01-04', tz='UTC')
 
@@ -1499,7 +1499,7 @@ class MinuteToDailyAggregationTestCase(WithBcolzMinuteBarReader,
                             tz='US/Eastern').tz_convert('UTC')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 1: {

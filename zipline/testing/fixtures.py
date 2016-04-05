@@ -194,7 +194,7 @@ class WithAssetFinder(object):
     with an AssetFinder. The default finder is the result of calling
     `tmp_asset_finder` with arguments generated as follows::
 
-       equities=cls.make_equities_info(),
+       equities=cls.make_equity_info(),
        futures=cls.make_futures_info(),
        exchanges=cls.make_exchanges_info(),
        root_symbols=cls.make_root_symbols_info(),
@@ -217,7 +217,7 @@ class WithAssetFinder(object):
     def _make_info(cls):
         return None
 
-    make_equities_info = _make_info
+    make_equity_info = _make_info
     make_futures_info = _make_info
     make_exchanges_info = _make_info
     make_root_symbols_info = _make_info
@@ -227,7 +227,7 @@ class WithAssetFinder(object):
     @classmethod
     def make_asset_finder(cls):
         return cls.enter_class_context(tmp_asset_finder(
-            equities=cls.make_equities_info(),
+            equities=cls.make_equity_info(),
             futures=cls.make_futures_info(),
             exchanges=cls.make_exchanges_info(),
             root_symbols=cls.make_root_symbols_info(),
@@ -578,7 +578,7 @@ class WithPipelineEventDataLoader(WithAssetFinder):
         return None
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.get_sids(),
             start_date=pd.Timestamp('2013-01-01', tz='UTC'),

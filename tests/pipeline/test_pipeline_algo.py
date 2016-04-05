@@ -92,7 +92,7 @@ class ClosesOnly(WithDataPortal, ZiplineTestCase):
     )
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return DataFrame.from_records([
             {
                 'sid': 1,
@@ -347,7 +347,7 @@ class PipelineAlgorithmTestCase(WithAdjustmentReader,
     assets = AAPL, MSFT, BRK_A
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             cls.assets,
             Timestamp('2014'),

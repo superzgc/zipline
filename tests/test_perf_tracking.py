@@ -261,7 +261,7 @@ class TestSplitPerformance(WithSimParams, WithTmpDir, ZiplineTestCase):
     SIM_PARAMS_CAPITAL_BASE = 10e3
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [1, 2],
             cls.SIM_PARAMS_START,
@@ -404,7 +404,7 @@ class TestCommissionEvents(WithSimParams, WithTmpDir, ZiplineTestCase):
     SIM_PARAMS_CAPITAL_BASE = 10e3
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [0, 1, 133],
             cls.SIM_PARAMS_START,
@@ -590,7 +590,7 @@ class TestDividendPerformance(WithSimParams,
     SIM_PARAMS_CAPITAL_BASE = 10e3
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info(
             [1, 2],
             cls.SIM_PARAMS_START,
@@ -2415,7 +2415,7 @@ class TestPositionTracker(WithTradingEnvironment,
                           WithInstanceTmpDir,
                           ZiplineTestCase):
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return make_simple_equity_info([1, 2], pd.NaT, pd.NaT)
 
     @classmethod

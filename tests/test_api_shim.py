@@ -120,7 +120,7 @@ class TestAPIShim(WithDataPortal, ZiplineTestCase):
     sids = 1, 2, 3
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 sid: {

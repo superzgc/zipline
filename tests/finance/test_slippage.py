@@ -55,7 +55,7 @@ class SlippageTestCase(WithDataPortal, ZiplineTestCase):
     )
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 133: {

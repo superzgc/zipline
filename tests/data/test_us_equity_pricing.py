@@ -82,7 +82,7 @@ class BcolzDailyBarTestCase(WithBcolzDailyBarReader, ZiplineTestCase):
     BCOLZ_DAILY_BAR_END = SIM_PARAMS_END = TEST_CALENDAR_STOP
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return EQUITY_INFO
 
     @classmethod

@@ -40,7 +40,7 @@ class TestBenchmark(WithDataPortal, ZiplineTestCase):
     SIM_PARAMS_END = pd.Timestamp('2006-12-29', tz='utc')
 
     @classmethod
-    def make_equities_info(cls):
+    def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 1: {
