@@ -152,7 +152,7 @@ class ZiplineTestCase(with_metaclass(FinalMeta(), TestCase)):
         return self._instance_teardown_stack.enter_context(context_manager)
 
     @final
-    def add_instance_callback(self, callback, *args, **kwargs):
+    def add_instance_callback(self, callback):
         """
         Register a callback to be executed during tearDown.
 
