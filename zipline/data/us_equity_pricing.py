@@ -160,10 +160,6 @@ def to_ctable(raw_data):
     return ctable_from_dict(columns)
 
 
-def _snd_to_ctable(tup):
-    return tup[0], to_ctable(tup[1])
-
-
 class BcolzDailyBarWriter(object):
     """
     Class capable of writing daily OHLCV data to disk in a format that can be
@@ -219,7 +215,7 @@ class BcolzDailyBarWriter(object):
             The newly-written table.
         """
         ctx = maybe_show_progress(
-            map(_snd_to_ctable, data),
+            ((sid, to_ctable(df)) for sid, df in data),
             show_progress=show_progress,
             item_show_func=self.progress_bar_item_show_func,
             label=self.progress_bar_message,

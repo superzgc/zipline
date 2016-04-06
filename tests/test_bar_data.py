@@ -540,15 +540,11 @@ class TestDailyBarData(WithBarDataChecks,
 
     @classmethod
     def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                sid: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_END,
-                    'symbol': "ASSET{0}".format(sid)
-                } for sid in cls.sids
-            },
-            orient='index',
+        return make_simple_equity_info(
+            cls.sids,
+            cls.SIM_PARAMS_START,
+            cls.SIM_PARAMS_END,
+            map('ASSET{}'.format, cls.sids),
         )
 
     @classmethod

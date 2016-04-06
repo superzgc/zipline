@@ -49,6 +49,7 @@ from zipline.pipeline.data import USEquityPricing
 from zipline.testing import (
     seconds_to_timestamp,
     str_to_seconds,
+    MockDailyBarReader,
 )
 from zipline.testing.fixtures import (
     WithAdjustmentReader,
@@ -275,11 +276,9 @@ class USEquityPricingLoaderTestCase(WithAdjustmentReader,
     def make_dividends_data(cls):
         return DIVIDENDS
 
-    class make_adjustment_writer_daily_bar_reader(object):
-        """A BcolzDailyBarReader which returns a constant value for spot price.
-        """
-        def spot_price(self, sid, day, column):
-            return 100.0
+    @classmethod
+    def make_adjustment_writer_daily_bar_reader(cls):
+        return MockDailyBarReader()
 
     @classmethod
     def make_daily_bar_data(cls):

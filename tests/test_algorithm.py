@@ -15,6 +15,8 @@
 from collections import namedtuple
 import datetime
 from datetime import timedelta
+from textwrap import dedent
+from unittest import TestCase, skip
 
 import logbook
 from logbook import TestHandler, WARNING
@@ -23,8 +25,6 @@ from nose_parameterized import parameterized
 from six import iteritems, itervalues
 from six.moves import range
 from testfixtures import TempDirectory
-from textwrap import dedent
-from unittest import TestCase, skip
 
 import numpy as np
 import pandas as pd
@@ -76,7 +76,6 @@ from zipline.testing import (
     make_test_handler,
     make_trade_data_for_asset_info,
     parameter_space,
-    tmp_dir,
     tmp_trading_env,
     to_utc,
     trades_by_sid_to_dfs,
@@ -903,7 +902,8 @@ class TestTransformAlgorithm(WithLogger,
             'start_date': period_start,
             'end_date': period_end + timedelta(days=1)
         }] * 2)
-        with tmp_dir() as tempdir, tmp_trading_env(equities=equities) as env:
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=equities) as env:
             sim_params = SimulationParameters(
                 period_start=period_start,
                 period_end=period_end,
@@ -1829,7 +1829,8 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
             },
             orient='index',
         )
-        with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=metadata) as env:
             sim_params = factory.create_simulation_parameters(
                 start=start,
                 num_days=4,
@@ -1952,7 +1953,8 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
             'start_date': self.sim_params.period_start,
             'end_date': '2020-01-01',
         }])
-        with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=metadata) as env:
             algo = SetAssetDateBoundsAlgorithm(
                 sim_params=self.sim_params,
                 env=env,
@@ -1969,7 +1971,8 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
             'start_date': '1989-01-01',
             'end_date': '1990-01-01',
         }])
-        with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=metadata) as env:
             data_portal = create_data_portal(
                 env,
                 tempdir,
@@ -1987,7 +1990,8 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
             'start_date': '2020-01-01',
             'end_date': '2021-01-01',
         }])
-        with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=metadata) as env:
             data_portal = create_data_portal(
                 env,
                 tempdir,

@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import pytz
 from six.moves import range
+from testfixtures import TempDirectory
 
 from zipline.assets.synthetic import make_simple_equity_info
 from zipline.finance.blotter import Blotter
@@ -38,7 +39,6 @@ from zipline.data.us_equity_pricing import BcolzDailyBarWriter
 from zipline.finance.slippage import FixedSlippage
 from zipline.protocol import BarData
 from zipline.testing import (
-    tmp_dir,
     tmp_trading_env,
     write_bcolz_minute_data,
 )
@@ -191,16 +191,9 @@ class FinanceTestCase(WithLogger,
         complete_fill = params.get('complete_fill')
 
         sid = 1
-        metadata = pd.DataFrame.from_dict(
-            {
-                sid: {
-                    'start_date': self.start,
-                    'end_date': self.end,
-                },
-            },
-            orient='index',
-        )
-        with tmp_dir() as tempdir, tmp_trading_env(equities=metadata) as env:
+        metadata = make_simple_equity_info([sid], self.start, self.end)
+        with TempDirectory() as tempdir, \
+                tmp_trading_env(equities=metadata) as env:
 
             if trade_interval < timedelta(days=1):
                 sim_params = factory.create_simulation_parameters(

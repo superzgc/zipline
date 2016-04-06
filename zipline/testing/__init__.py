@@ -42,7 +42,6 @@ from .core import (  # noqa
     tmp_asset_finder,
     tmp_assets_db,
     tmp_bcolz_minute_bar_reader,
-    tmp_dir,
     tmp_trading_env,
     to_series,
     to_utc,

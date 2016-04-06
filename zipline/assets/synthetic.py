@@ -83,7 +83,7 @@ def make_simple_equity_info(sids,
         symbols = list(ascii_uppercase[:num_assets])
     return pd.DataFrame(
         {
-            'symbol': symbols,
+            'symbol': list(symbols),
             'start_date': pd.to_datetime([start_date] * num_assets),
             'end_date': pd.to_datetime([end_date] * num_assets),
             'exchange': 'TEST',

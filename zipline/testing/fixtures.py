@@ -10,6 +10,7 @@ import pandas as pd
 from pandas.util.testing import assert_series_equal
 import responses
 from six import with_metaclass, iteritems
+from testfixtures import TempDirectory
 
 from ..assets.synthetic import make_simple_equity_info
 from .core import (
@@ -17,7 +18,6 @@ from .core import (
     create_minute_bar_data,
     gen_calendars,
     tmp_asset_finder,
-    tmp_dir,
 )
 from ..data.data_portal import DataPortal
 from ..data.us_equity_pricing import (
@@ -404,7 +404,9 @@ class WithTmpDir(object):
     @classmethod
     def init_class_fixtures(cls):
         super(WithTmpDir, cls).init_class_fixtures()
-        cls.tmpdir = cls.enter_class_context(tmp_dir(cls.TMP_DIR_PATH))
+        cls.tmpdir = cls.enter_class_context(
+            TempDirectory(path=cls.TMP_DIR_PATH),
+        )
 
 
 class WithInstanceTmpDir(object):
@@ -426,7 +428,7 @@ class WithInstanceTmpDir(object):
     def init_instance_fixtures(self):
         super(WithInstanceTmpDir, self).init_instance_fixtures()
         self.instance_tmpdir = self.enter_instance_context(
-            tmp_dir(self.TMP_DIR_PATH),
+            TempDirectory(path=self.TMP_DIR_PATH),
         )
 
 

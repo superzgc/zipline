@@ -327,8 +327,7 @@ def make_trade_data_for_asset_info(dates,
     volumes = (volume_sid_deltas + volume_date_deltas[:, None]) + volume_start
 
     for j, sid in enumerate(sids):
-        start_date = asset_info.loc[sid, 'start_date']
-        end_date = asset_info.loc[sid, 'end_date']
+        start_date, end_date = asset_info.loc[sid, ['start_date', 'end_date']]
         # Normalize here so the we still generate non-NaN values on the minutes
         # for an asset's last trading day.
         for i, date in enumerate(dates.normalize()):
@@ -553,7 +552,7 @@ def write_minute_data_for_asset(env, writer, start_dt, end_dt, sid,
 def create_daily_df_for_asset(env, start_day, end_day, interval=1):
     days = env.days_in_range(start_day, end_day)
     days_count = len(days)
-    days_arr = np.arange(2, days_count + 2)
+    days_arr = np.arange(days_count) + 2
 
     df = pd.DataFrame(
         {
@@ -600,7 +599,6 @@ def trades_by_sid_to_dfs(trades_by_sid, index):
                 "low": lows,
                 "close": closes,
                 "volume": volumes,
-                "day": [day.value for day in index]
             },
             index=index,
         )
@@ -1109,7 +1107,7 @@ def create_empty_dividends_frame():
                 ('pay_date', 'datetime64[ns]'),
                 ('record_date', 'datetime64[ns]'),
                 ('declared_date', 'datetime64[ns]'),
-                ('amount', 'float32'),
+                ('amount', 'float64'),
                 ('sid', 'int32'),
             ],
         ),
@@ -1123,7 +1121,7 @@ def create_empty_splits_mergers_frame():
             [],
             dtype=[
                 ('effective_date', 'int64'),
-                ('ratio', 'float32'),
+                ('ratio', 'float64'),
                 ('sid', 'int64'),
             ],
         ),
@@ -1223,38 +1221,7 @@ def patch_os_environment(remove=None, **values):
                 os.environ[old_key] = old_value
 
 
-class tmp_dir(object):
-    """A reentrant temporary directory context manager.
-
-    Parameters
-    ----------
-    path : str, optional
-        The path to the directory. If not given, this will be a unique name.
-
-    See Also
-    --------
-    testfixtures.TempDirectory
-    """
-    def __init__(self, path=None):
-        self.path = path
-        self._depth = 0
-        self._tmpdir = None
-
-    def __enter__(self):
-        if not self._depth:
-            assert self._tmpdir is None, 'tmpdir was not reset to None'
-            self._tmpdir = TempDirectory(path=self.path)
-        self._depth += 1
-        return self._tmpdir
-
-    def __exit__(self, *excinfo):
-        self._depth -= 1
-        if not self._depth:
-            self._tmpdir.cleanup()
-            self._tmpdir = None
-
-
-class _TmpBarReader(with_metaclass(ABCMeta, tmp_dir)):
+class _TmpBarReader(with_metaclass(ABCMeta, TempDirectory)):
     """A helper for tmp_bcolz_minute_bar_reader and tmp_bcolz_daily_bar_reader.
 
     Parameters

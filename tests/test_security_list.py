@@ -1,6 +1,7 @@
-import pandas as pd
-
 from datetime import timedelta
+
+import pandas as pd
+from testfixtures import TempDirectory
 
 from zipline.algorithm import TradingAlgorithm
 from zipline.errors import TradingControlViolation
@@ -8,7 +9,6 @@ from zipline.testing import (
     add_security_data,
     create_data_portal,
     security_list_copy,
-    tmp_dir,
     tmp_trading_env,
 )
 from zipline.testing.fixtures import WithLogger, ZiplineTestCase
@@ -101,8 +101,8 @@ class SecurityListTestCase(WithLogger, ZiplineTestCase):
             } for symbol in symbols]),
         ))
 
-        cls.tempdir = cls.enter_class_context(tmp_dir())
-        cls.tempdir2 = cls.enter_class_context(tmp_dir())
+        cls.tempdir = cls.enter_class_context(TempDirectory())
+        cls.tempdir2 = cls.enter_class_context(TempDirectory())
 
         cls.data_portal = create_data_portal(
             env=cls.env,
@@ -258,7 +258,7 @@ class SecurityListTestCase(WithLogger, ZiplineTestCase):
             'start_date': sim_params.period_start,
             'end_date': sim_params.period_end,
         }])
-        with tmp_dir() as new_tempdir, \
+        with TempDirectory() as new_tempdir, \
                 security_list_copy(), \
                 tmp_trading_env(equities=equities) as env:
             # add a delete statement removing bzq
