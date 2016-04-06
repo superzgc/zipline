@@ -5,7 +5,6 @@ from six import with_metaclass
 
 from zipline.utils.final import (
     FinalMeta,
-    final_meta_factory,
     final,
 )
 
@@ -13,7 +12,7 @@ from zipline.utils.final import (
 class FinalMetaTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        class ClassWithFinal(with_metaclass(FinalMeta, object)):
+        class ClassWithFinal(with_metaclass(FinalMeta(), object)):
             a = final('ClassWithFinal: a')
             b = 'ClassWithFinal: b'
 
@@ -159,7 +158,7 @@ class FinalMetaTestCase(TestCase):
 class FinalABCMetaTestCase(FinalMetaTestCase):
     @classmethod
     def setUpClass(cls):
-        FinalABCMeta = final_meta_factory(ABCMeta)
+        FinalABCMeta = FinalMeta(ABCMeta)
 
         class ABCWithFinal(with_metaclass(FinalABCMeta, object)):
             a = final('ABCWithFinal: a')
@@ -217,7 +216,7 @@ class FinalABCMetaTestCase(FinalMetaTestCase):
         """
         Tests that subclasses don't destroy the __setattr__.
         """
-        class ClassWithFinal(with_metaclass(FinalMeta, object)):
+        class ClassWithFinal(with_metaclass(FinalMeta(), object)):
             @final
             def f(self):
                 return 'ClassWithFinal: f'
@@ -232,7 +231,7 @@ class FinalABCMetaTestCase(FinalMetaTestCase):
 
     def test_final_classmethod(self):
 
-        class ClassWithClassMethod(with_metaclass(FinalMeta, object)):
+        class ClassWithClassMethod(with_metaclass(FinalMeta(), object)):
             count = 0
 
             @final
