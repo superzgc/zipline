@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from toolz import merge
 
+from zipline.assets.synthetic import make_simple_equity_info
 from zipline._protocol import handle_non_market_minutes
 from zipline.protocol import BarData
 from zipline.testing import (
@@ -100,15 +101,12 @@ class TestMinuteBarData(WithBarDataChecks,
 
     @classmethod
     def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                sid: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_END,
-                    'symbol': "ASSET{0}".format(sid)
-                } for sid in [1, 2, 3, 4, 5]
-            },
-            orient='index',
+        sids = [1, 2, 3, 4, 5]
+        return make_simple_equity_info(
+            sids,
+            cls.SIM_PARAMS_START,
+            cls.SIM_PARAMS_END,
+            map('ASSET{}'.format, sids),
         )
 
     @classmethod
