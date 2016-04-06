@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractproperty
 import sqlite3
 from unittest import TestCase
 
@@ -34,14 +35,13 @@ from ..data.minute_bars import (
     US_EQUITIES_MINUTES_PER_DAY
 )
 from ..utils import tradingcalendar, factory
-from ..utils.classproperty import classproperty
 from ..utils.final import FinalMeta, final
 from zipline.pipeline import Pipeline, SimplePipelineEngine
 from zipline.utils.numpy_utils import make_datetime64D
 from zipline.utils.numpy_utils import NaTD
 
 
-class ZiplineTestCase(with_metaclass(FinalMeta, TestCase)):
+class ZiplineTestCase(with_metaclass(FinalMeta(), TestCase)):
     """
     Shared extensions to core unittest.TestCase.
 
@@ -172,8 +172,11 @@ class WithLogger(object):
     After init_instance_fixtures has been called `self.log_handler` will be a
     new ``logbook.NullHandler``.
 
-    This behavior may be overridden by defining a ``make_log_handler`` class
-    method which returns a new logbook.LogHandler instance.
+    Methods
+    -------
+    make_log_handler() -> logbook.LogHandler
+        A class method which constructs the new log handler object. By default
+        this will construct a ``NullHandler``.
     """
     make_log_handler = NullHandler
 
@@ -191,19 +194,27 @@ class WithAssetFinder(object):
     ZiplineTestCase mixin providing cls.asset_finder as a class-level fixture.
 
     After init_class_fixtures has been called, `cls.asset_finder` is populated
-    with an AssetFinder. The default finder is the result of calling
-    `tmp_asset_finder` with arguments generated as follows::
+    with an AssetFinder.
 
-       equities=cls.make_equity_info(),
-       futures=cls.make_futures_info(),
-       exchanges=cls.make_exchanges_info(),
-       root_symbols=cls.make_root_symbols_info(),
-
-    Each of these methods may be overridden with a function returning a
-    alternative dataframe of data to write.
-
-    The top-level creation behavior can be altered by overriding
-    `make_asset_finder` as a class method.
+    Methods
+    -------
+    make_equity_info() -> pd.DataFrame
+        A class method which constructs the dataframe of equity info to write
+        to the class's asset db. By default this is empty.
+    make_futures_info() -> pd.DataFrame
+        A class method which constructs the dataframe of futures contract info
+        to write to the class's asset db. By default this is empty.
+    make_exchanges_info() -> pd.DataFrame
+        A class method which constructs the dataframe of exchange information
+        to write to the class's assets db. By default this is empty.
+    make_root_symbols_info() -> pd.DataFrame
+        A class method which constructs the dataframe of root symbols
+        information to write to the class's assets db. By default this is
+        empty.
+    make_asset_finder() -> pd.DataFrame
+        A class method which constructs the actual asset finder object to use
+        for the class. If this method is overridden then the ``make_*_info``
+        methods may not be respected.
 
     See Also
     --------
@@ -247,9 +258,30 @@ class WithTradingEnvironment(WithAssetFinder):
     with a trading environment whose `asset_finder` is the result of
     `cls.make_asset_finder`.
 
-    The ``load`` function may be provided by overriding the
-    ``make_load_function`` class method.
+    Attributes
+    ----------
+    TRADING_ENV_MIN_DATE : datetime
+        The min_date to forward to the constructed TradingEnvironment.
+    TRADING_ENV_MAX_DATE : datetime
+        The max date to forward to the constructed TradingEnvironment.
+    TRADING_ENV_TRADING_CALENDAR : pd.DatetimeIndex
+        The trading calendar to use for the class's TradingEnvironment.
 
+    Methods
+    -------
+    make_load_function() -> callable
+        A class method that returns the ``load`` argument to pass to the
+        constructor of ``TradingEnvironment`` for this class.
+        The signature for the callable returned is:
+        ``(datetime, pd.DatetimeIndex, str) -> (pd.Series, pd.DataFrame)``
+    make_trading_environment() -> TradingEnvironment
+        A class method that constructs the trading environment for the class.
+        If this is overridden then ``make_load_function`` or the class
+        attributes may not be respected.
+
+    See Also
+    --------
+    :class:`zipline.finance.trading.TradingEnvironment`
     """
     TRADING_ENV_MIN_DATE = None
     TRADING_ENV_MAX_DATE = None
@@ -283,11 +315,26 @@ class WithSimParams(WithTradingEnvironment):
     by putting ``SIM_PARAMS_{argname}`` in the class dict except for the
     trading environment which is overridden with the mechanisms provided by
     ``WithTradingEnvironment``.
+
+    Attributes
+    ----------
+    SIM_PARAMS_YEAR : int
+    SIM_PARAMS_START : datetime
+    SIM_PARAMS_END : datetime
+    SIM_PARAMS_CAPITAL_BASE : float
+    SIM_PARAMS_NUM_DAYS : int
+    SIM_PARAMS_DATA_FREQUENCY : {'daily', 'minute'}
+    SIM_PARAMS_EMISSION_RATE : {'daily', 'minute'}
+        Forwarded to ``factory.create_simulation_parameters``.
+
+    See Also
+    --------
+    zipline.utils.factory.create_simulation_parameters
     """
     SIM_PARAMS_YEAR = None
     SIM_PARAMS_START = pd.Timestamp('2006-01-03', tz='utc')
     SIM_PARAMS_END = pd.Timestamp('2006-12-29', tz='utc')
-    SIM_PARAMS_CAPITAL_BASE = float("1.0e5")
+    SIM_PARAMS_CAPITAL_BASE = 1.0e5
     SIM_PARAMS_NUM_DAYS = None
     SIM_PARAMS_DATA_FREQUENCY = 'daily'
     SIM_PARAMS_EMISSION_RATE = 'daily'
@@ -316,8 +363,14 @@ class WithNYSETradingDays(object):
 
     (DATA_MAX_DAY - (cls.TRADING_DAY_COUNT) -> DATA_MAX_DAY)
 
-    The default value of TRADING_DAY_COUNT is 126 (half a trading-year).
-    Inheritors can override TRADING_DAY_COUNT to request more or less data.
+    Attributes
+    ----------
+    DATA_MAX_DAY : datetime
+        The most recent trading day in the calendar.
+    TRADING_DAY_COUNT : int
+        The number of days to put in the calendar. The default value of
+        ``TRADING_DAY_COUNT`` is 126 (half a trading-year). Inheritors can
+        override TRADING_DAY_COUNT to request more or less data.
     """
     DATA_MAX_DAY = pd.Timestamp('2016-01-04', tz='utc')
     TRADING_DAY_COUNT = 126
@@ -340,8 +393,11 @@ class WithTmpDir(object):
     After init_class_fixtures has been called, `cls.tmpdir` is populated with
     a `testfixtures.TempDirectory` object whose path is `cls.TMP_DIR_PATH`.
 
-    The default value of TMP_DIR_PATH is None which will create a unique
-    directory in /tmp.
+    Attributes
+    ----------
+    TMP_DIR_PATH : str
+        The path to the new directory to create. By default this is None
+        which will create a unique directory in /tmp.
     """
     TMP_DIR_PATH = None
 
@@ -359,14 +415,19 @@ class WithInstanceTmpDir(object):
     with a `testfixtures.TempDirectory` object whose path is
     `cls.TMP_DIR_PATH`.
 
-    The default value of TMP_DIR_PATH is None which will create a unique
-    directory in /tmp.
+    Attributes
+    ----------
+    INSTANCE_TMP_DIR_PATH : str
+        The path to the new directory to create. By default this is None
+        which will create a unique directory in /tmp.
     """
-    TMP_DIR_PATH = None
+    INSTANCE_TMP_DIR_PATH = None
 
     def init_instance_fixtures(self):
         super(WithInstanceTmpDir, self).init_instance_fixtures()
-        self.tmpdir = self.enter_instance_context(tmp_dir(self.TMP_DIR_PATH))
+        self.instance_tmpdir = self.enter_instance_context(
+            tmp_dir(self.TMP_DIR_PATH),
+        )
 
 
 class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
@@ -384,10 +445,38 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
     - `cls.bcolz_daily_bar_reader` is a daily bar reader pointing to the
       directory that was just written to.
 
+    Attributes
+    ----------
+    BCOLZ_DAILY_BAR_PATH : str
+        The path inside the tmpdir where this will be written.
+    BCOLZ_DAILY_BAR_LOOKBACK_DAYS : int
+        The number of days of data to add before the first day in the
+        sim_params. This is used when a test needs to use history, in which
+        case this should be set to the largest history window that will be
+        requested.
+    BCOLZ_DAILY_BAR_FROM_CSVS : bool
+        If this flag is set it is assumed that ``make_daily_bar_data`` will
+        return a dict mapping sid to filepath to csv data to be written with
+        the ``write_csvs`` method of a ``BcolzDailyBarWriter``.
+    BCOLZ_DAILY_BAR_USE_FULL_CALENDAR : bool
+        If this flag is set the ``bcolz_daily_bar_days`` will be the full
+        set of trading days from the trading environment. This flag overrides
+        ``BCOLZ_DAILY_BAR_LOOKBACK_DAYS``.
+
+    Methods
+    -------
+    make_daily_bar_data() -> iterable[(int, pd.DataFrame)]
+        A class method that returns an iterator of (sid, dataframe) pairs
+        which will be written to the bcolz files that the class's
+        ``BcolzDailyBarReader`` will read from. By default this creates
+        some simple sythetic data with
+        :func:`~zipline.testing.create_daily_bar_data`
+
     See Also
     --------
     WithBcolzMinuteBarReader
     WithDataPortal
+    zipline.testing.create_daily_bar_data
     """
     BCOLZ_DAILY_BAR_PATH = 'daily_equity_pricing.bcolz'
     BCOLZ_DAILY_BAR_LOOKBACK_DAYS = 0
@@ -407,17 +496,17 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
         cls.bcolz_daily_bar_path = p = cls.tmpdir.makedir(
             cls.BCOLZ_DAILY_BAR_PATH,
         )
-        cls.bcolz_daily_bar_days = days = (
-            cls.env.trading_days
-            if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR else
-            cls.env.days_in_range(
+        if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR:
+            days = cls.env.trading_days
+        else:
+            days = cls.env.days_in_range(
                 cls.env.trading_days[
                     cls.env.get_index(cls.sim_params.period_start) -
                     cls.BCOLZ_DAILY_BAR_LOOKBACK_DAYS
                 ],
                 cls.sim_params.period_end,
             )
-        )
+        cls.bcolz_daily_bar_days = days
         cls.bcolz_daily_bar_ctable = t = getattr(
             BcolzDailyBarWriter(p, days),
             'write_csvs' if cls.BCOLZ_DAILY_BAR_FROM_CSVS else 'write',
@@ -441,10 +530,34 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
     - `cls.bcolz_minute_bar_reader` is a minute bar reader pointing to the
       directory that was just written to.
 
+    Attributes
+    ----------
+    BCOLZ_MINUTE_BAR_PATH : str
+        The path inside the tmpdir where this will be written.
+    BCOLZ_MINUTE_BAR_LOOKBACK_DAYS : int
+        The number of days of data to add before the first day in the
+        sim_params. This is used when a test needs to use history, in which
+        case this should be set to the largest history window that will be
+        requested.
+    BCOLZ_MINUTE_BAR_USE_FULL_CALENDAR : bool
+        If this flag is set the ``bcolz_daily_bar_days`` will be the full
+        set of trading days from the trading environment. This flag overrides
+        ``BCOLZ_MINUTE_BAR_LOOKBACK_DAYS``.
+
+    Methods
+    -------
+    make_minute_bar_data() -> dict[int -> pd.DataFrame]
+        A class method that returns a dict mapping sid to dataframe
+        which will be written to the bcolz files that the class's
+        ``BcolzMinuteBarReader`` will read from. By default this creates
+        some simple sythetic data with
+        :func:`~zipline.testing.create_minute_bar_data`
+
     See Also
     --------
     WithBcolzDailyBarReader
     WithDataPortal
+    zipline.testing.create_minute_bar_data
     """
     BCOLZ_MINUTE_BAR_PATH = 'minute_equity_pricing.bcolz'
     BCOLZ_MINUTE_BAR_LOOKBACK_DAYS = 0
@@ -466,17 +579,17 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
         cls.bcolz_minute_bar_path = p = cls.tmpdir.makedir(
             cls.BCOLZ_MINUTE_BAR_PATH,
         )
-        cls.bcolz_minute_bar_days = days = (
-            cls.env.trading_days
-            if cls.BCOLZ_MINUTE_BAR_USE_FULL_CALENDAR else
-            cls.env.days_in_range(
+        if cls.BCOLZ_MINUTE_BAR_USE_FULL_CALENDAR:
+            days = cls.env.trading_days
+        else:
+            days = cls.env.days_in_range(
                 cls.env.trading_days[
                     cls.env.get_index(cls.sim_params.period_start) -
                     cls.BCOLZ_MINUTE_BAR_LOOKBACK_DAYS
                 ],
                 cls.sim_params.period_end,
             )
-        )
+        cls.bcolz_minute_bar_days = days
         writer = BcolzMinuteBarWriter(
             days[0],
             p,
@@ -484,8 +597,8 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
             cls.env.open_and_closes.market_close.loc[days],
             US_EQUITIES_MINUTES_PER_DAY
         )
-        cls.bcolz_minute_bar_data = df_dict = cls.make_minute_bar_data()
-        for sid, df in iteritems(df_dict):
+        cls.bcolz_minute_bar_data = cls.make_minute_bar_data()
+        for sid, df in iteritems(cls.bcolz_minute_bar_data):
             writer.write(sid, df)
 
         cls.bcolz_minute_bar_reader = BcolzMinuteBarReader(p)
@@ -504,8 +617,30 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
     by overriding `make_adjustment_writer_daily_bar_reader`. This is useful
     to providing a `MockDailyBarReader`.
 
-    For more advanced configuration, `make_adjustment_writer` may be
-    overwritten directly.
+    Methods
+    -------
+    make_splits_data() -> pd.DataFrame
+        A class method that returns a dataframe of splits data to write to the
+        class's adjustment db. By default this is empty.
+    make_mergers_data() -> pd.DataFrame
+        A class method that returns a dataframe of mergers data to write to the
+        class's adjustment db. By default this is empty.
+    make_dividends_data() -> pd.DataFrame
+        A class method that returns a dataframe of dividends data to write to
+        the class's adjustment db. By default this is empty.
+    make_stock_dividends_data() -> pd.DataFrame
+        A class method that returns a dataframe of stock dividends data to
+        write to the class's adjustment db. By default this is empty.
+    make_adjustment_writer_daily_bar_reader() -> pd.DataFrame
+        A class method that returns the daily bar reader to use for the class's
+        adjustment writer. By default this is the class's actual
+        ``bcolz_daily_bar_reader`` as inherited from
+        ``WithBcolzDailyBarReader``. This should probably not be overridden;
+        however, some tests used a ``MockDailyBarReader`` for this.
+    make_adjustment_writer(conn: sqlite3.Connection) -> AdjustmentWriter
+        A class method that constructs the adjustment which will be used
+        to write the data into the connection to be used by the class's
+        adjustment reader.
 
     See Also
     --------
@@ -523,9 +658,9 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
     del _make_data
 
     @classmethod
-    def make_adjustment_writer(cls):
+    def make_adjustment_writer(cls, conn):
         return SQLiteAdjustmentWriter(
-            cls.adjustment_db_conn,
+            conn,
             cls.make_adjustment_writer_daily_bar_reader(),
             cls.bcolz_daily_bar_days,
         )
@@ -537,7 +672,7 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
     @classmethod
     def init_class_fixtures(cls):
         super(WithAdjustmentReader, cls).init_class_fixtures()
-        cls.adjustment_db_conn = conn = sqlite3.connect(':memory:')
+        conn = sqlite3.connect(':memory:')
         cls.make_adjustment_writer().write(
             splits=cls.make_splits_data(),
             mergers=cls.make_mergers_data(),
@@ -547,15 +682,28 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
         cls.adjustment_reader = SQLiteAdjustmentReader(conn)
 
 
-class WithPipelineEventDataLoader(WithAssetFinder):
+class WithPipelineEventDataLoader(with_metaclass(
+        type('_', (type(WithAssetFinder), ABCMeta), {}), WithAssetFinder)):
     """
     ZiplineTestCase mixin providing common test methods/behaviors for event
     data loaders.
 
-    `get_sids` must return the sids being tested.
-    `get_dataset` must return {sid -> pd.DataFrame}
-    `loader_type` must return the loader class to use for loading the dataset
-    `make_asset_finder` returns a default asset finder which can be overridden.
+    Attributes
+    ----------
+    loader_type : PipelineLoader
+        The type of loader to use. This must be overridden by subclasses.
+
+    Methods
+    -------
+    get_sids() -> iterable[int]
+        Class method which returns the sids that need to be available to the
+        tests.
+    get_dataset() -> dict[int -> pd.DataFrmae]
+        Class method which returns a mapping from sid to data for that sid.
+        By default this is empty for every sid.
+    pipeline_event_loader_args(dates: pd.DatetimeIndex) -> tuple[any]
+        The arguments to pass to the ``loader_type`` to construct the pipeline
+        loader for this test.
     """
     @classmethod
     def get_sids(cls):
@@ -565,9 +713,9 @@ class WithPipelineEventDataLoader(WithAssetFinder):
     def get_dataset(cls):
         return {sid: pd.DataFrame() for sid in cls.get_sids()}
 
-    @classmethod
+    @abstractproperty
     def loader_type(self):
-        return None
+        raise NotImplementedError('loader_type')
 
     @classmethod
     def make_equity_info(cls):
@@ -676,32 +824,42 @@ class WithDataPortal(WithAdjustmentReader, WithBcolzMinuteBarReader):
     trading env, `cls.bcolz_minute_bar_reader`, `cls.bcolz_daily_bar_reader`,
     and `cls.adjustment_reader`.
 
-    Any of the three readers may be set to false by overriding:
-    DATA_PORTAL_USE_DAILY_DATA = False
-    DATA_PORTAL_USE_MINUTE_DATA = False
-    DATA_PORTAL_USE_ADJUSTMENTS = False
+    Attributes
+    ----------
+    DATA_PORTAL_USE_DAILY_DATA : bool
+        Should the daily bar reader be used? Defaults to True.
+    DATA_PORTAL_USE_MINUTE_DATA : bool
+        Should the minute bar reader be used? Defaults to True.
+    DATA_PORTAL_USE_ADJUSTMENTS : bool
+        Should the adjustment reader be used? Defaults to True.
+
+    Methods
+    -------
+    make_data_portal() -> DataPortal
+        Method which returns the data portal to be used for each test case.
+        If this is overridden, the ``DATA_PORTAL_USE_*`` attributes may not
+        be respected.
     """
     DATA_PORTAL_USE_DAILY_DATA = True
     DATA_PORTAL_USE_MINUTE_DATA = True
     DATA_PORTAL_USE_ADJUSTMENTS = True
 
-    @classmethod
-    def make_data_portal(cls):
+    def make_data_portal(self):
         return DataPortal(
-            cls.env,
+            self.env,
             equity_daily_reader=(
-                cls.bcolz_daily_bar_reader
-                if cls.DATA_PORTAL_USE_DAILY_DATA else
+                self.bcolz_daily_bar_reader
+                if self.DATA_PORTAL_USE_DAILY_DATA else
                 None
             ),
             equity_minute_reader=(
-                cls.bcolz_minute_bar_reader
-                if cls.DATA_PORTAL_USE_MINUTE_DATA else
+                self.bcolz_minute_bar_reader
+                if self.DATA_PORTAL_USE_MINUTE_DATA else
                 None
             ),
             adjustment_reader=(
-                cls.adjustment_reader
-                if cls.DATA_PORTAL_USE_ADJUSTMENTS else
+                self.adjustment_reader
+                if self.DATA_PORTAL_USE_ADJUSTMENTS else
                 None
             ),
         )
