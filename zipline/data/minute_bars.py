@@ -30,7 +30,7 @@ from zipline.data._minute_bar_internal import (
     find_last_traded_position_internal
 )
 
-from zipline.utils.memoize import remember_last, lazyval
+from zipline.utils.memoize import lazyval, remember_last
 
 US_EQUITIES_MINUTES_PER_DAY = 390
 

@@ -1,6 +1,7 @@
 """
 Tests for zipline.utils.memoize.
 """
+from collections import defaultdict
 from unittest import TestCase
 
 from zipline.utils.memoize import remember_last
@@ -32,3 +33,45 @@ class TestRememberLast(TestCase):
         # Calling the old value should still increment the counter.
         self.assertEqual((func(1), call_count[0]), (1, 3))
         self.assertEqual((func(1), call_count[0]), (1, 3))
+
+    def test_remember_last_instance(self):
+        call_count = defaultdict(int)
+
+        class clz(object):
+            @remember_last
+            def func(self, x):
+                call_count[self] += 1
+                return x
+
+        inst1 = clz()
+
+        self.assertEqual((inst1.func(1), call_count), (1, {inst1: 1}))
+
+        # Calling again with the same argument should just re-use the old
+        # value, which means func shouldn't get called again.
+        self.assertEqual((inst1.func(1), call_count), (1, {inst1: 1}))
+        self.assertEqual((inst1.func(1), call_count), (1, {inst1: 1}))
+
+        # Calling with a new value should increment the counter.
+        self.assertEqual((inst1.func(2), call_count), (2, {inst1: 2}))
+        self.assertEqual((inst1.func(2), call_count), (2, {inst1: 2}))
+
+        # Calling the old value should still increment the counter.
+        self.assertEqual((inst1.func(1), call_count), (1, {inst1: 3}))
+        self.assertEqual((inst1.func(1), call_count), (1, {inst1: 3}))
+
+        inst2 = clz()
+        self.assertEqual((inst2.func(1), call_count),
+                         (1, {inst1: 3, inst2: 1}))
+        self.assertEqual((inst2.func(1), call_count),
+                         (1, {inst1: 3, inst2: 1}))
+
+        self.assertEqual((inst2.func(2), call_count),
+                         (2, {inst1: 3, inst2: 2}))
+        self.assertEqual((inst2.func(2), call_count),
+                         (2, {inst1: 3, inst2: 2}))
+
+        self.assertEqual((inst2.func(1), call_count),
+                         (1, {inst1: 3, inst2: 3}))
+        self.assertEqual((inst2.func(1), call_count),
+                         (1, {inst1: 3, inst2: 3}))

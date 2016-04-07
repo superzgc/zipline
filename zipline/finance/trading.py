@@ -32,7 +32,7 @@ from zipline.assets.asset_writer import (
 from zipline.errors import (
     NoFurtherDataError
 )
-from zipline.utils.memoize import remember_last, lazyval
+from zipline.utils.memoize import lazyval, remember_last
 
 log = logbook.Logger('Trading')
 
