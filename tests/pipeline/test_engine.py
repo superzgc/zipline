@@ -35,10 +35,7 @@ from pandas.util.testing import assert_frame_equal
 from six import iteritems, itervalues
 from toolz import merge
 
-from zipline.assets.synthetic import (
-    make_rotating_equity_info,
-    make_simple_equity_info,
-)
+from zipline.assets.synthetic import make_rotating_equity_info
 from zipline.lib.adjustment import MULTIPLY
 from zipline.pipeline.loaders.synthetic import PrecomputedLoader
 from zipline.pipeline import Pipeline

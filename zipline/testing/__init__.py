@@ -48,5 +48,4 @@ from .core import (  # noqa
     trades_by_sid_to_dfs,
     write_bcolz_minute_data,
     write_compressed,
-    write_minute_data_for_asset,
 )

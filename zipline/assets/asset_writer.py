@@ -237,25 +237,19 @@ class _empty(object):
 
 
 class AssetDBWriter(object):
-    """
-    Class used to write arbitrary data to SQLite database.
-    Concrete subclasses will implement the logic for a specific
-    input datatypes by implementing the _load_data method.
+    """Class used to write data to an assets db.
 
     Parameters
     ----------
     engine : Engine or str
-        An SQLAlchemy engine to a SQL database.
-    allow_sid_assignment: bool, optional
-        If True then the instance can assign sids where necessary.
+        An SQLAlchemy engine or path to a SQL database.
     """
     DEFAULT_CHUNK_SIZE = SQLITE_MAX_VARIABLE_NUMBER
 
-    def __init__(self, engine, allow_sid_assignment=True):
+    def __init__(self, engine):
         if isinstance(engine, str):
             engine = sa.create_engine('sqlite:///' + engine)
         self.engine = engine
-        self.allow_sid_assignment = allow_sid_assignment
 
     def write(self,
               equities=None,
@@ -336,7 +330,7 @@ class AssetDBWriter(object):
             chunksize=chunk_size
         )
 
-    def _check_for_tables(self, txn):
+    def _all_tables_present(self, txn):
         """
         Checks if any tables are present in the current assets database.
 
@@ -374,7 +368,7 @@ class AssetDBWriter(object):
             if txn is None:
                 txn = stack.enter_context(self.engine.begin())
 
-            tables_already_exist = self._check_for_tables(txn)
+            tables_already_exist = self._all_tables_present(txn)
             metadata = generate_asset_db_metadata(bind=txn)
 
             # Create the SQL tables if they do not already exist.

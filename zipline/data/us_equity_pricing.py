@@ -13,7 +13,7 @@
 # limitations under the License.
 from abc import ABCMeta, abstractmethod, abstractproperty
 from errno import ENOENT
-from functools import reduce, partial
+from functools import partial
 import operator as op
 from os import remove
 from os.path import exists
@@ -128,7 +128,7 @@ def winsorise_uint32(df, column, *columns):
         zeroed out.
     """
     columns = (column,) + columns
-    df[reduce(op.or_, (df[c] > UINT32_MAX for c in columns))] = 0
+    df[(df[list(columns)] > UINT32_MAX).any(axis=1)] = 0
     return df
 
 

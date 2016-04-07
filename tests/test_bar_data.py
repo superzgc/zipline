@@ -535,7 +535,6 @@ class TestDailyBarData(WithBarDataChecks,
     DIVIDEND_ASSET_SID = 7
     ILLIQUID_DIVIDEND_ASSET_SID = 8
 
-
     @classmethod
     def make_splits_data(cls):
         return pd.DataFrame.from_records([

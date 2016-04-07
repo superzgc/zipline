@@ -14,7 +14,7 @@
 
 from abc import ABCMeta
 from numbers import Integral
-from operator import itemgetter, methodcaller
+from operator import itemgetter
 
 from logbook import Logger
 import numpy as np

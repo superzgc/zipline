@@ -570,7 +570,7 @@ class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
         cls.bcolz_daily_bar_path = p = cls.tmpdir.makedir(
             cls.BCOLZ_DAILY_BAR_PATH,
         )
-        if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR: 
+        if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR:
             days = cls.env.trading_days
         else:
             days = cls.env.days_in_range(

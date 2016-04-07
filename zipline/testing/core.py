@@ -541,14 +541,6 @@ def create_minute_df_for_asset(env,
     return df
 
 
-def write_minute_data_for_asset(env, writer, start_dt, end_dt, sid,
-                                interval=1, start_val=1):
-    writer.writer(
-        sid,
-        create_minute_df_for_asset(env, start_dt, end_dt, interval, start_val),
-    )
-
-
 def create_daily_df_for_asset(env, start_day, end_day, interval=1):
     days = env.days_in_range(start_day, end_day)
     days_count = len(days)
@@ -1237,7 +1229,7 @@ class _TmpBarReader(with_metaclass(ABCMeta, TempDirectory)):
         will be a unique name.
     """
     @abstractproperty
-    def _reader(self):
+    def _reader_cls(self):
         raise NotImplementedError('_reader')
 
     @abstractmethod
@@ -1259,7 +1251,7 @@ class _TmpBarReader(with_metaclass(ABCMeta, TempDirectory)):
             tmpdir.path,
             self._data,
         )
-        return self._reader(tmpdir.path)
+        return self._reader_cls(tmpdir.path)
 
 
 class tmp_bcolz_minute_bar_reader(_TmpBarReader):
@@ -1281,7 +1273,7 @@ class tmp_bcolz_minute_bar_reader(_TmpBarReader):
     --------
     tmp_bcolz_daily_bar_reader
     """
-    _reader = BcolzMinuteBarReader
+    _reader_cls = BcolzMinuteBarReader
     _write = staticmethod(write_bcolz_minute_data)
 
 
@@ -1304,7 +1296,7 @@ class tmp_bcolz_daily_bar_reader(_TmpBarReader):
     --------
     tmp_bcolz_daily_bar_reader
     """
-    _reader = BcolzDailyBarReader
+    _reader_cls = BcolzDailyBarReader
 
     @staticmethod
     def _write(env, days, path, data):

@@ -12,20 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import bisect
 import datetime
-from collections import MutableMapping
 from copy import deepcopy
-
-try:
-    from six.moves._thread import get_ident
-except ImportError:
-    from six.moves._dummy_thread import get_ident
 
 import numpy as np
 import pandas as pd
-from toolz import merge
 
 
 def _ensure_index(x):
