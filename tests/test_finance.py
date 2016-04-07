@@ -59,13 +59,9 @@ _multiprocess_can_split_ = False
 class FinanceTestCase(WithLogger,
                       WithTradingEnvironment,
                       ZiplineTestCase):
-
-    start = pd.Timestamp('2006-01-01', tz='utc')
-    end = pd.Timestamp('2006-12-31', tz='utc')
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info([1, 2, 133], cls.start, cls.end)
+    ASSET_FINDER_EQUITY_SIDS = 1, 2, 133
+    start = START_DATE = pd.Timestamp('2006-01-01', tz='utc')
+    end = END_DATE = pd.Timestamp('2006-12-31', tz='utc')
 
     def init_instance_fixtures(self):
         super(FinanceTestCase, self).init_instance_fixtures()

@@ -38,11 +38,11 @@ ALL_FIELDS = OHLCP + ['volume']
 
 
 class WithHistory(WithDataPortal):
-    TRADING_START_DT = TRADING_ENV_MIN_DATE = SIM_PARAMS_START = pd.Timestamp(
+    TRADING_START_DT = TRADING_ENV_MIN_DATE = START_DATE = pd.Timestamp(
         '2014-02-03',
         tz='UTC',
     )
-    TRADING_END_DT = SIM_PARAMS_END = pd.Timestamp('2016-01-29', tz='UTC')
+    TRADING_END_DT = END_DATE = pd.Timestamp('2016-01-29', tz='UTC')
 
     SPLIT_ASSET_SID = 4
     DIVIDEND_ASSET_SID = 5
@@ -944,7 +944,7 @@ class DailyEquityHistoryTestCase(WithHistory, ZiplineTestCase):
     @classmethod
     def make_daily_bar_data(cls):
         yield 1, cls.create_df_for_asset(
-            cls.sim_params.period_start,
+            cls.START_DATE,
             pd.Timestamp('2016-01-30', tz='UTC')
         )
         yield 3, cls.create_df_for_asset(
@@ -1486,10 +1486,10 @@ class MinuteToDailyAggregationTestCase(WithBcolzMinuteBarReader,
     # 20 21 22 23 24 25 26
     # 27 28 29 30 31
 
-    TRADING_ENV_MIN_DATE = SIM_PARAMS_START = pd.Timestamp(
+    TRADING_ENV_MIN_DATE = START_DATE = pd.Timestamp(
         '2016-03-01', tz='UTC',
     )
-    TRADING_ENV_MAX_DATE = SIM_PARAMS_END = pd.Timestamp(
+    TRADING_ENV_MAX_DATE = END_DATE = pd.Timestamp(
         '2016-03-31', tz='UTC',
     )
 

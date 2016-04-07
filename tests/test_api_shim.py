@@ -15,6 +15,7 @@ from zipline.testing import (
 )
 from zipline.testing.fixtures import (
     WithDataPortal,
+    WithSimParams,
     ZiplineTestCase,
 )
 from zipline.zipline_warnings import ZiplineDeprecationWarning
@@ -112,9 +113,9 @@ def handle_data(context, data):
 """
 
 
-class TestAPIShim(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp("2016-01-05", tz='UTC')
-    SIM_PARAMS_END = pd.Timestamp("2016-01-28", tz='UTC')
+class TestAPIShim(WithDataPortal, WithSimParams, ZiplineTestCase):
+    START_DATE = pd.Timestamp("2016-01-05", tz='UTC')
+    END_DATE = pd.Timestamp("2016-01-28", tz='UTC')
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
 
     sids = 1, 2, 3

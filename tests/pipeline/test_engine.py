@@ -150,17 +150,9 @@ class RollingSumSum(CustomFactor):
 
 
 class ConstantInputTestCase(WithTradingEnvironment, ZiplineTestCase):
-    asset_ids = 1, 2, 3
-    start = Timestamp('2014-01-01', tz='utc')
-    end = Timestamp('2014-03-01', tz='utc')
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.asset_ids,
-            start_date=cls.start,
-            end_date=cls.end,
-        )
+    asset_ids = ASSET_FINDER_EQUITY_SIDS = 1, 2, 3
+    start = ASSET_FINDER_EQUITY_START_DATE = Timestamp('2014-01-01', tz='utc')
+    end = ASSET_FINDER_EQUITY_END_DATE = Timestamp('2014-03-01', tz='utc')
 
     @classmethod
     def init_class_fixtures(cls):
@@ -517,17 +509,9 @@ class ConstantInputTestCase(WithTradingEnvironment, ZiplineTestCase):
 
 
 class FrameInputTestCase(WithTradingEnvironment, ZiplineTestCase):
-    asset_ids = 1, 2, 3
-    start = Timestamp('2015-01-01', tz='utc')
-    end = Timestamp('2015-01-31', tz='utc')
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.asset_ids,
-            start_date=cls.start,
-            end_date=cls.end,
-        )
+    asset_ids = ASSET_FINDER_EQUITY_SIDS = 1, 2, 3
+    start = ASSET_FINDER_EQUITY_START_DATE = Timestamp('2015-01-01', tz='utc')
+    end = ASSET_FINDER_EQUITY_END_DATE = Timestamp('2015-01-31', tz='utc')
 
     @classmethod
     def init_class_fixtures(cls):
@@ -631,8 +615,8 @@ class FrameInputTestCase(WithTradingEnvironment, ZiplineTestCase):
 class SyntheticBcolzTestCase(WithAdjustmentReader,
                              ZiplineTestCase):
     first_asset_start = Timestamp('2015-04-01', tz='UTC')
-    SIM_PARAMS_START = Timestamp('2015-01-01', tz='utc')
-    SIM_PARAMS_END = Timestamp('2015-08-01', tz='utc')
+    START_DATE = Timestamp('2015-01-01', tz='utc')
+    END_DATE = Timestamp('2015-08-01', tz='utc')
 
     @classmethod
     def make_equity_info(cls):

@@ -83,6 +83,7 @@ from zipline.testing import (
 from zipline.testing.fixtures import (
     WithDataPortal,
     WithLogger,
+    WithSimParams,
     WithTradingEnvironment,
     WithTmpDir,
     ZiplineTestCase,
@@ -141,15 +142,8 @@ from zipline.utils.tradingcalendar import trading_day, trading_days
 _multiprocess_can_split_ = False
 
 
-class TestRecordAlgorithm(WithDataPortal, ZiplineTestCase):
-    @classmethod
-    def make_equity_info(cls):
-        ds = cls.TRADING_ENV_TRADING_CALENDAR.trading_days
-        return make_simple_equity_info(
-            [133],
-            ds[ds.searchsorted(cls.SIM_PARAMS_START)],
-            cls.SIM_PARAMS_END,
-        )
+class TestRecordAlgorithm(WithSimParams, WithDataPortal, ZiplineTestCase):
+    ASSET_FINDER_EQUITY_SIDS = 133,
 
     def test_record_incr(self):
         algo = RecordAlgorithm(sim_params=self.sim_params, env=self.env)
@@ -166,6 +160,7 @@ class TestRecordAlgorithm(WithDataPortal, ZiplineTestCase):
 
 
 class TestMiscellaneousAPI(WithLogger,
+                           WithSimParams,
                            WithDataPortal,
                            ZiplineTestCase):
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
@@ -705,19 +700,12 @@ def handle_data(context, data):
 
 class TestTransformAlgorithm(WithLogger,
                              WithDataPortal,
+                             WithSimParams,
                              ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 4
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
-    sids = [0, 1, 133]
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.sids,
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=cls.SIM_PARAMS_NUM_DAYS + 5),
-        )
+    sids = ASSET_FINDER_EQUITY_SIDS = [0, 1, 133]
 
     @classmethod
     def make_futures_info(cls):
@@ -924,19 +912,12 @@ class TestTransformAlgorithm(WithLogger,
 
 class TestPositions(WithLogger,
                     WithDataPortal,
+                    WithSimParams,
                     ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 4
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
-    sids = [1, 133]
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.sids,
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=cls.SIM_PARAMS_NUM_DAYS + 5),
-        )
+    sids = ASSET_FINDER_EQUITY_SIDS = [1, 133]
 
     def test_empty_portfolio(self):
         algo = EmptyPositionsAlgorithm(self.sids,
@@ -967,25 +948,21 @@ class TestPositions(WithLogger,
 
 
 class TestBeforeTradingStart(WithDataPortal,
+                             WithSimParams,
                              ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2016-01-06', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2016-01-07', tz='utc')
+    START_DATE = pd.Timestamp('2016-01-06', tz='utc')
+    END_DATE = pd.Timestamp('2016-01-07', tz='utc')
     SIM_PARAMS_CAPITAL_BASE = 10000
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
-    BCOLZ_DAILY_BAR_LOOKBACK_DAYS = 1
-    BCOLZ_MINUTE_BAR_LOOKBACK_DAYS = 1
+    BCOLZ_DAILY_BAR_LOOKBACK_DAYS = BCOLZ_MINUTE_BAR_LOOKBACK_DAYS = 1
 
-    data_start = pd.Timestamp('2016-01-05', tz='utc')
+    data_start = ASSET_FINDER_EQUITY_START_DATE = pd.Timestamp(
+        '2016-01-05',
+        tz='utc',
+    )
 
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {sid: {"start_date": cls.data_start,
-                   "end_date": cls.SIM_PARAMS_END + timedelta(days=5),
-                   "symbol": "ASSET{0}".format(sid)}
-             for sid in (1, 2)},
-            orient='index',
-        )
+    ASSET_FINDER_EQUITY_SIDS = 1, 2
+    ASSET_FINDER_EQUITY_SYMBOLS = 'ASSET1', 'ASSET2'
 
     @classmethod
     def make_minute_bar_data(cls):
@@ -1010,7 +987,7 @@ class TestBeforeTradingStart(WithDataPortal,
 
     @classmethod
     def make_daily_bar_data(cls):
-        for sid in (1, 2):
+        for sid in cls.ASSET_FINDER_EQUITY_SIDS:
             yield sid, create_daily_df_for_asset(
                 cls.env,
                 cls.data_start,
@@ -1202,9 +1179,10 @@ class TestBeforeTradingStart(WithDataPortal,
 
 class TestAlgoScript(WithLogger,
                      WithDataPortal,
+                     WithSimParams,
                      ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 251
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-12-31', tz='utc')
     BCOLZ_DAILY_BAR_LOOKBACK_DAYS = 5  # max history window length
 
     sids = [0, 1, 3, 133]
@@ -1213,15 +1191,15 @@ class TestAlgoScript(WithLogger,
     def make_equity_info(cls):
         data = make_simple_equity_info(
             cls.sids,
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=365),
+            cls.START_DATE,
+            cls.END_DATE,
         )
         data.loc[3, 'symbol'] = 'TEST'
         return data
 
     @classmethod
     def make_daily_bar_data(cls):
-        days = cls.SIM_PARAMS_NUM_DAYS
+        days = len(cls.env.days_in_range(cls.START_DATE, cls.END_DATE))
         return trades_by_sid_to_dfs(
             {
                 0: factory.create_trade_history(
@@ -1562,19 +1540,14 @@ def handle_data(context, data):
 
 
 class TestGetDatetime(WithLogger,
+                      WithSimParams,
                       WithDataPortal,
                       ZiplineTestCase):
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
-    SIM_PARAMS_START = to_utc('2014-01-02 9:31')
-    SIM_PARAMS_END = to_utc('2014-01-03 9:31')
+    START_DATE = to_utc('2014-01-02 9:31')
+    END_DATE = to_utc('2014-01-03 9:31')
 
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [0, 1],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_END,
-        )
+    ASSET_FINDER_EQUITY_SIDS = 0, 1
 
     @parameterized.expand(
         [
@@ -1617,25 +1590,12 @@ class TestGetDatetime(WithLogger,
         self.assertFalse(algo.first_bar)
 
 
-class TestTradingControls(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 4
+class TestTradingControls(WithSimParams, WithDataPortal, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
     sid = 133
-    sids = 133, 134
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                sid: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_START + timedelta(days=10),
-                }
-                for sid in cls.sids
-            },
-            orient='index',
-        )
+    sids = ASSET_FINDER_EQUITY_SIDS = 133, 134
 
     @classmethod
     def init_class_fixtures(cls):
@@ -2006,18 +1966,11 @@ class TestTradingControls(WithDataPortal, ZiplineTestCase):
                 algo.run(data_portal)
 
 
-class TestAccountControls(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 4
-    sidint = 133
+class TestAccountControls(WithDataPortal, WithSimParams, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [cls.sidint],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=7),
-        )
+    sidint, = ASSET_FINDER_EQUITY_SIDS = 133,
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -2161,10 +2114,10 @@ class TestAccountControls(WithDataPortal, ZiplineTestCase):
 #                 format(i, actual_position, expected_positions[i]))
 
 
-class TestFutureFlip(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2006-01-09', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2006-01-10', tz='utc')
-    sid = 1
+class TestFutureFlip(WithSimParams, WithDataPortal, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-09', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-10', tz='utc')
+    sid, = ASSET_FINDER_EQUITY_SIDS = 1,
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -2248,10 +2201,14 @@ class TestTradingAlgorithm(ZiplineTestCase):
 
 
 class TestOrderCancelation(WithDataPortal,
+                           WithSimParams,
                            ZiplineTestCase):
 
-    SIM_PARAMS_START = pd.Timestamp('2016-01-05', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2016-01-07', tz='utc')
+    START_DATE = pd.Timestamp('2016-01-05', tz='utc')
+    END_DATE = pd.Timestamp('2016-01-07', tz='utc')
+
+    ASSET_FINDER_EQUITY_SIDS = 1,
+    ASSET_FINDER_EQUITY_SYMBOLS = 'ASSET1',
 
     code = dedent(
         """\
@@ -2277,19 +2234,6 @@ class TestOrderCancelation(WithDataPortal,
                 context.ordered = True
         """,
     )
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                1: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_END,
-                    'symbol': 'ASSET1',
-                },
-            },
-            orient='index',
-        )
 
     @classmethod
     def make_minute_bar_data(cls):

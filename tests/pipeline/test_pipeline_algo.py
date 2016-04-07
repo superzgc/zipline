@@ -85,11 +85,9 @@ def rolling_vwap(df, length):
 
 class ClosesOnly(WithDataPortal, ZiplineTestCase):
     sids = 1, 2, 3
-    SIM_PARAMS_START = pd.Timestamp('2014-01-01', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2014-02-01', tz='utc')
-    dates = date_range(
-        '2014-01-01', '2014-02-01', freq=trading_day, tz='UTC'
-    )
+    START_DATE = pd.Timestamp('2014-01-01', tz='utc')
+    END_DATE = pd.Timestamp('2014-02-01', tz='utc')
+    dates = date_range(START_DATE, END_DATE, freq=trading_day, tz='utc')
 
     @classmethod
     def make_equity_info(cls):

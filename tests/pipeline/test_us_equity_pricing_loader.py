@@ -256,8 +256,8 @@ DIVIDENDS_EXPECTED = DataFrame(
 
 class USEquityPricingLoaderTestCase(WithAdjustmentReader,
                                     ZiplineTestCase):
-    SIM_PARAMS_START = TEST_CALENDAR_START
-    SIM_PARAMS_END = TEST_CALENDAR_STOP
+    START_DATE = TEST_CALENDAR_START
+    END_DATE = TEST_CALENDAR_STOP
     asset_ids = 1, 2, 3
 
     @classmethod

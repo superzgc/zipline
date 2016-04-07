@@ -31,33 +31,34 @@ from zipline.testing import (
 )
 from zipline.testing.fixtures import (
     WithDataPortal,
+    WithSimParams,
     ZiplineTestCase,
 )
 
 
-class TestBenchmark(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2006-01-03', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2006-12-29', tz='utc')
+class TestBenchmark(WithDataPortal, WithSimParams, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-12-29', tz='utc')
 
     @classmethod
     def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 1: {
-                    "start_date": cls.SIM_PARAMS_START,
-                    "end_date": cls.SIM_PARAMS_END + timedelta(days=1)
+                    "start_date": cls.START_DATE,
+                    "end_date": cls.END_DATE + timedelta(days=1)
                 },
                 2: {
-                    "start_date": cls.SIM_PARAMS_START,
-                    "end_date": cls.SIM_PARAMS_END + timedelta(days=1)
+                    "start_date": cls.START_DATE,
+                    "end_date": cls.END_DATE + timedelta(days=1)
                 },
                 3: {
                     "start_date": pd.Timestamp('2006-05-26', tz='utc'),
                     "end_date": pd.Timestamp('2006-08-09', tz='utc')
                 },
                 4: {
-                    "start_date": cls.SIM_PARAMS_START,
-                    "end_date": cls.SIM_PARAMS_END + timedelta(days=1)
+                    "start_date": cls.START_DATE,
+                    "end_date": cls.END_DATE + timedelta(days=1)
                 },
             },
             orient='index',

@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 from toolz import merge
 
-from zipline.assets.synthetic import make_simple_equity_info
 from zipline._protocol import handle_non_market_minutes
 from zipline.protocol import BarData
 from zipline.testing import (
@@ -92,22 +91,17 @@ class WithBarDataChecks(object):
 class TestMinuteBarData(WithBarDataChecks,
                         WithDataPortal,
                         ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2016-01-05', tz='UTC')
-    SIM_PARAMS_END = pd.Timestamp('2016-01-07', tz='UTC')
+    START_DATE = pd.Timestamp('2016-01-05', tz='UTC')
+    END_DATE = ASSET_FINDER_EQUITY_END_DATE = pd.Timestamp(
+        '2016-01-07',
+        tz='UTC',
+    )
+
+    ASSET_FINDER_EQUITY_SIDS = 1, 2, 3, 4, 5
 
     SPLIT_ASSET_SID = 3
     ILLIQUID_SPLIT_ASSET_SID = 4
     HILARIOUSLY_ILLIQUID_ASSET_SID = 5
-
-    @classmethod
-    def make_equity_info(cls):
-        sids = [1, 2, 3, 4, 5]
-        return make_simple_equity_info(
-            sids,
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_END,
-            map('ASSET{}'.format, sids),
-        )
 
     @classmethod
     def make_minute_bar_data(cls):
@@ -526,10 +520,13 @@ class TestMinuteBarData(WithBarDataChecks,
 class TestDailyBarData(WithBarDataChecks,
                        WithDataPortal,
                        ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2016-01-05', tz='UTC')
-    SIM_PARAMS_END = pd.Timestamp('2016-01-08', tz='UTC')
+    START_DATE = pd.Timestamp('2016-01-05', tz='UTC')
+    END_DATE = ASSET_FINDER_EQUITY_END_DATE = pd.Timestamp(
+        '2016-01-08',
+        tz='UTC',
+    )
 
-    sids = set(range(1, 9))
+    sids = ASSET_FINDER_EQUITY_SIDS = set(range(1, 9))
 
     SPLIT_ASSET_SID = 3
     ILLIQUID_SPLIT_ASSET_SID = 4
@@ -538,14 +535,6 @@ class TestDailyBarData(WithBarDataChecks,
     DIVIDEND_ASSET_SID = 7
     ILLIQUID_DIVIDEND_ASSET_SID = 8
 
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.sids,
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_END,
-            map('ASSET{}'.format, cls.sids),
-        )
 
     @classmethod
     def make_splits_data(cls):

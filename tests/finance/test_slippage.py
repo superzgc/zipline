@@ -35,21 +35,22 @@ from zipline.protocol import BarData
 from zipline.testing import tmp_bcolz_minute_bar_reader
 from zipline.testing.fixtures import (
     WithDataPortal,
+    WithSimParams,
     ZiplineTestCase,
 )
 
 
-class SlippageTestCase(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2006-01-05 14:31', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2006-01-05 14:36', tz='utc')
+class SlippageTestCase(WithSimParams, WithDataPortal, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-05 14:31', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-05 14:36', tz='utc')
     SIM_PARAMS_CAPITAL_BASE = 1.0e5
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
     SIM_PARAMS_EMISSION_RATE = 'daily'
 
     sids = 133,
     minutes = pd.DatetimeIndex(
-        start=SIM_PARAMS_START,
-        end=SIM_PARAMS_END - pd.Timedelta('1 minute'),
+        start=START_DATE,
+        end=END_DATE - pd.Timedelta('1 minute'),
         freq='1min'
     )
 

@@ -12,9 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from datetime import timedelta
+import pandas as pd
 
-from zipline.assets.synthetic import make_simple_equity_info
 from zipline.test_algorithms import (
     ExceptionAlgorithm,
     DivByZeroAlgorithm,
@@ -22,6 +21,7 @@ from zipline.test_algorithms import (
 )
 from zipline.testing.fixtures import (
     WithDataPortal,
+    WithSimParams,
     ZiplineTestCase,
 )
 
@@ -29,19 +29,11 @@ DEFAULT_TIMEOUT = 15  # seconds
 EXTENDED_TIMEOUT = 90
 
 
-class ExceptionTestCase(WithDataPortal, ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 4
+class ExceptionTestCase(WithDataPortal, WithSimParams, ZiplineTestCase):
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    START_DATE = pd.Timestamp('2006-01-07', tz='utc')
 
-    sid = 133
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [cls.sid],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=7),
-        )
+    sid, = ASSET_FINDER_EQUITY_SIDS = 133,
 
     def test_exception_in_handle_data(self):
         algo = ExceptionAlgorithm('handle_data',

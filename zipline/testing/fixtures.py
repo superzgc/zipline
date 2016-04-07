@@ -11,6 +11,7 @@ from pandas.util.testing import assert_series_equal
 import responses
 from six import with_metaclass, iteritems
 from testfixtures import TempDirectory
+from toolz import flip
 
 from ..assets.synthetic import make_simple_equity_info
 from .core import (
@@ -35,6 +36,7 @@ from ..data.minute_bars import (
     US_EQUITIES_MINUTES_PER_DAY
 )
 from ..utils import tradingcalendar, factory
+from ..utils.classproperty import classproperty
 from ..utils.final import FinalMeta, final
 from zipline.pipeline import Pipeline, SimplePipelineEngine
 from zipline.utils.numpy_utils import make_datetime64D
@@ -164,6 +166,39 @@ class ZiplineTestCase(with_metaclass(FinalMeta(), TestCase)):
         return self._instance_teardown_stack.callback(callback)
 
 
+def alias(attr_name):
+    """Make a fixture attribute an alias of another fixture's attribute by
+    default.
+
+    Parameters
+    ----------
+    attr_name : str
+        The name of the attribute to alias.
+
+    Returns
+    -------
+    p : classproperty
+        A class property that does the propert aliasing.
+    """
+    return classproperty(flip(getattr, attr_name))
+
+
+class WithDefaultDateBounds(object):
+    """
+    ZiplineTestCase mixin which makes it possible to synchronize date bounds
+    across fixtures.
+
+    Attributes
+    ----------
+    START_DATE : datetime
+    END_DATE : datetime
+        The date bounds to be used for fixtures that want to have consistent
+        dates.
+    """
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-12-29', tz='utc')
+
+
 class WithLogger(object):
     """
     ZiplineTestCase mixin providing cls.log_handler as an instance-level
@@ -189,12 +224,25 @@ class WithLogger(object):
         )
 
 
-class WithAssetFinder(object):
+class WithAssetFinder(WithDefaultDateBounds):
     """
     ZiplineTestCase mixin providing cls.asset_finder as a class-level fixture.
 
     After init_class_fixtures has been called, `cls.asset_finder` is populated
     with an AssetFinder.
+
+    Attributes
+    ----------
+    ASSET_FINDER_EQUITY_SIDS : iterable[int]
+        The default sids to construct equity data for.
+    ASSET_FINDER_EQUITY_SYMBOLS : iterable[str]
+        The default symbols to use for the equities.
+    ASSET_FINDER_EQUITY_START_DATE : datetime
+        The default start date to create equity data for. This defaults to
+        ``START_DATE``.
+    ASSET_FINDER_EQUITY_END_DATE : datetime
+        The default end date to create equity data for. This defaults to
+        ``END_DATE + pd.Timedelta(days=1)``.
 
     Methods
     -------
@@ -224,16 +272,34 @@ class WithAssetFinder(object):
     zipline.testing.make_future_info
     zipline.testing.make_commodity_future_info
     """
+    ASSET_FINDER_EQUITY_SIDS = tuple(map(ord, 'ABC'))
+    ASSET_FINDER_EQUITY_SYMBOLS = None
+    ASSET_FINDER_EQUITY_START_DATE = alias('START_DATE')
+
+    @classproperty
+    def ASSET_FINDER_EQUITY_END_DATE(cls):
+        # add one day to end to make sure the asset exists through the end
+        # of the data
+        return cls.END_DATE + pd.Timedelta(days=1)
+
     @classmethod
     def _make_info(cls):
         return None
 
-    make_equity_info = _make_info
     make_futures_info = _make_info
     make_exchanges_info = _make_info
     make_root_symbols_info = _make_info
 
     del _make_info
+
+    @classmethod
+    def make_equity_info(cls):
+        return make_simple_equity_info(
+            cls.ASSET_FINDER_EQUITY_SIDS,
+            cls.ASSET_FINDER_EQUITY_START_DATE,
+            cls.ASSET_FINDER_EQUITY_END_DATE,
+            cls.ASSET_FINDER_EQUITY_SYMBOLS,
+        )
 
     @classmethod
     def make_asset_finder(cls):
@@ -319,25 +385,29 @@ class WithSimParams(WithTradingEnvironment):
     Attributes
     ----------
     SIM_PARAMS_YEAR : int
-    SIM_PARAMS_START : datetime
-    SIM_PARAMS_END : datetime
     SIM_PARAMS_CAPITAL_BASE : float
     SIM_PARAMS_NUM_DAYS : int
     SIM_PARAMS_DATA_FREQUENCY : {'daily', 'minute'}
     SIM_PARAMS_EMISSION_RATE : {'daily', 'minute'}
         Forwarded to ``factory.create_simulation_parameters``.
 
+    SIM_PARAMS_START : datetime
+    SIM_PARAMS_END : datetime
+        Forwarded to ``factory.create_simulation_parameters``. If not
+        explicitly overridden these will be ``START_DATE`` and ``END_DATE``
+
     See Also
     --------
     zipline.utils.factory.create_simulation_parameters
     """
     SIM_PARAMS_YEAR = None
-    SIM_PARAMS_START = pd.Timestamp('2006-01-03', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2006-12-29', tz='utc')
     SIM_PARAMS_CAPITAL_BASE = 1.0e5
     SIM_PARAMS_NUM_DAYS = None
     SIM_PARAMS_DATA_FREQUENCY = 'daily'
     SIM_PARAMS_EMISSION_RATE = 'daily'
+
+    SIM_PARAMS_START = alias('START_DATE')
+    SIM_PARAMS_END = alias('END_DATE')
 
     @classmethod
     def init_class_fixtures(cls):
@@ -428,11 +498,11 @@ class WithInstanceTmpDir(object):
     def init_instance_fixtures(self):
         super(WithInstanceTmpDir, self).init_instance_fixtures()
         self.instance_tmpdir = self.enter_instance_context(
-            TempDirectory(path=self.TMP_DIR_PATH),
+            TempDirectory(path=self.INSTANCE_TMP_DIR_PATH),
         )
 
 
-class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
+class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
     """
     ZiplineTestCase mixin providing cls.bcolz_daily_bar_path,
     cls.bcolz_daily_bar_ctable, and cls.bcolz_daily_bar_reader class level
@@ -452,9 +522,9 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
     BCOLZ_DAILY_BAR_PATH : str
         The path inside the tmpdir where this will be written.
     BCOLZ_DAILY_BAR_LOOKBACK_DAYS : int
-        The number of days of data to add before the first day in the
-        sim_params. This is used when a test needs to use history, in which
-        case this should be set to the largest history window that will be
+        The number of days of data to add before the first day. This is used
+        when a test needs to use history, in which case this should be set to
+        the largest history window that will be
         requested.
     BCOLZ_DAILY_BAR_FROM_CSVS : bool
         If this flag is set it is assumed that ``make_daily_bar_data`` will
@@ -484,6 +554,8 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
     BCOLZ_DAILY_BAR_LOOKBACK_DAYS = 0
     BCOLZ_DAILY_BAR_FROM_CSVS = False
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR = False
+    BCOLZ_DAILY_BAR_START_DATE = alias('START_DATE')
+    BCOLZ_DAILY_BAR_END_DATE = alias('END_DATE')
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -498,15 +570,15 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
         cls.bcolz_daily_bar_path = p = cls.tmpdir.makedir(
             cls.BCOLZ_DAILY_BAR_PATH,
         )
-        if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR:
+        if cls.BCOLZ_DAILY_BAR_USE_FULL_CALENDAR: 
             days = cls.env.trading_days
         else:
             days = cls.env.days_in_range(
                 cls.env.trading_days[
-                    cls.env.get_index(cls.sim_params.period_start) -
+                    cls.env.get_index(cls.BCOLZ_DAILY_BAR_START_DATE) -
                     cls.BCOLZ_DAILY_BAR_LOOKBACK_DAYS
                 ],
-                cls.sim_params.period_end,
+                cls.BCOLZ_DAILY_BAR_END_DATE,
             )
         cls.bcolz_daily_bar_days = days
         cls.bcolz_daily_bar_ctable = t = getattr(
@@ -517,7 +589,7 @@ class WithBcolzDailyBarReader(WithTmpDir, WithSimParams):
         cls.bcolz_daily_bar_reader = BcolzDailyBarReader(t)
 
 
-class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
+class WithBcolzMinuteBarReader(WithTradingEnvironment, WithTmpDir):
     """
     ZiplineTestCase mixin providing cls.bcolz_minute_bar_path,
     cls.bcolz_minute_bar_ctable, and cls.bcolz_minute_bar_reader class level
@@ -537,10 +609,9 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
     BCOLZ_MINUTE_BAR_PATH : str
         The path inside the tmpdir where this will be written.
     BCOLZ_MINUTE_BAR_LOOKBACK_DAYS : int
-        The number of days of data to add before the first day in the
-        sim_params. This is used when a test needs to use history, in which
-        case this should be set to the largest history window that will be
-        requested.
+        The number of days of data to add before the first day.
+        This is used when a test needs to use history, in which case this
+        should be set to the largest history window that will be requested.
     BCOLZ_MINUTE_BAR_USE_FULL_CALENDAR : bool
         If this flag is set the ``bcolz_daily_bar_days`` will be the full
         set of trading days from the trading environment. This flag overrides
@@ -564,6 +635,8 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
     BCOLZ_MINUTE_BAR_PATH = 'minute_equity_pricing.bcolz'
     BCOLZ_MINUTE_BAR_LOOKBACK_DAYS = 0
     BCOLZ_MINUTE_BAR_USE_FULL_CALENDAR = False
+    BCOLZ_MINUTE_BAR_START_DATE = alias('START_DATE')
+    BCOLZ_MINUTE_BAR_END_DATE = alias('END_DATE')
 
     @classmethod
     def make_minute_bar_data(cls):
@@ -586,10 +659,10 @@ class WithBcolzMinuteBarReader(WithTmpDir, WithSimParams):
         else:
             days = cls.env.days_in_range(
                 cls.env.trading_days[
-                    cls.env.get_index(cls.sim_params.period_start) -
+                    cls.env.get_index(cls.BCOLZ_MINUTE_BAR_START_DATE) -
                     cls.BCOLZ_MINUTE_BAR_LOOKBACK_DAYS
                 ],
-                cls.sim_params.period_end,
+                cls.BCOLZ_MINUTE_BAR_END_DATE,
             )
         cls.bcolz_minute_bar_days = days
         writer = BcolzMinuteBarWriter(
@@ -675,7 +748,7 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
     def init_class_fixtures(cls):
         super(WithAdjustmentReader, cls).init_class_fixtures()
         conn = sqlite3.connect(':memory:')
-        cls.make_adjustment_writer().write(
+        cls.make_adjustment_writer(conn).write(
             splits=cls.make_splits_data(),
             mergers=cls.make_mergers_data(),
             dividends=cls.make_dividends_data(),
@@ -685,7 +758,7 @@ class WithAdjustmentReader(WithBcolzDailyBarReader):
 
 
 class WithPipelineEventDataLoader(with_metaclass(
-        type('_', (type(WithAssetFinder), ABCMeta), {}), WithAssetFinder)):
+        type('_', (ABCMeta, type(ZiplineTestCase)), {}), WithAssetFinder)):
     """
     ZiplineTestCase mixin providing common test methods/behaviors for event
     data loaders.
@@ -816,7 +889,7 @@ class WithPipelineEventDataLoader(with_metaclass(
                                     check_names=False)
 
 
-class WithDataPortal(WithAdjustmentReader, WithBcolzMinuteBarReader):
+class WithDataPortal(WithBcolzMinuteBarReader, WithAdjustmentReader):
     """
     ZiplineTestCase mixin providing self.data_portal as an instance level
     fixture.

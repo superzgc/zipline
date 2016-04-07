@@ -256,17 +256,11 @@ def setup_env_data(env, sim_params, sids, futures_sids=[]):
 
 
 class TestSplitPerformance(WithSimParams, WithTmpDir, ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 2
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-04', tz='utc')
     SIM_PARAMS_CAPITAL_BASE = 10e3
 
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [1, 2],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=7),
-        )
+    ASSET_FINDER_EQUITY_SIDS = 1, 2
 
     @classmethod
     def init_class_fixtures(cls):
@@ -399,17 +393,10 @@ class TestSplitPerformance(WithSimParams, WithTmpDir, ZiplineTestCase):
 
 
 class TestCommissionEvents(WithSimParams, WithTmpDir, ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 5
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-09', tz='utc')
+    ASSET_FINDER_EQUITY_SIDS = 0, 1, 133
     SIM_PARAMS_CAPITAL_BASE = 10e3
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [0, 1, 133],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=7),
-        )
 
     @classmethod
     def init_class_fixtures(cls):
@@ -585,17 +572,10 @@ class TestCommissionEvents(WithSimParams, WithTmpDir, ZiplineTestCase):
 class TestDividendPerformance(WithSimParams,
                               WithInstanceTmpDir,
                               ZiplineTestCase):
-    SIM_PARAMS_END = None
-    SIM_PARAMS_NUM_DAYS = 6
+    START_DATE = pd.Timestamp('2006-01-03', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-10', tz='utc')
+    ASSET_FINDER_EQUITY_SIDS = 1, 2
     SIM_PARAMS_CAPITAL_BASE = 10e3
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            [1, 2],
-            cls.SIM_PARAMS_START,
-            cls.SIM_PARAMS_START + timedelta(days=10),
-        )
 
     @classmethod
     def init_class_fixtures(cls):
@@ -624,7 +604,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -642,10 +622,9 @@ class TestDividendPerformance(WithSimParams,
         })
         writer.write(splits, mergers, dividends)
         adjustment_reader = SQLiteAdjustmentReader(dbpath)
-
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -690,7 +669,7 @@ class TestDividendPerformance(WithSimParams,
                 env=self.env
             )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -721,7 +700,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             events,
         )
@@ -764,7 +743,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -785,7 +764,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -825,7 +804,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -846,7 +825,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -886,7 +865,7 @@ class TestDividendPerformance(WithSimParams,
             self.sim_params,
             env=self.env
         )
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -908,7 +887,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -952,7 +931,7 @@ class TestDividendPerformance(WithSimParams,
         for i in range(30):
             pay_date = factory.get_next_trading_dt(pay_date, oneday, self.env)
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -973,7 +952,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -1013,7 +992,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -1034,7 +1013,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -1071,7 +1050,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -1092,7 +1071,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: events},
         )
@@ -1127,7 +1106,7 @@ class TestDividendPerformance(WithSimParams,
             env=self.env
         )
 
-        dbpath = self.tmpdir.getpath('adjustments.sqlite')
+        dbpath = self.instance_tmpdir.getpath('adjustments.sqlite')
 
         writer = SQLiteAdjustmentWriter(
             dbpath,
@@ -1160,7 +1139,7 @@ class TestDividendPerformance(WithSimParams,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             sim_params,
             {1: events},
         )
@@ -1195,8 +1174,8 @@ class TestDividendPerformanceHolidayStyle(TestDividendPerformance):
     # two days ahead. Any tests that hard code events
     # to be start + oneday will fail, since those events will
     # be skipped by the simulation.
-    SIM_PARAMS_START = pd.Timestamp('2003-11-30', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2003-12-08', tz='utc')
+    START_DATE = pd.Timestamp('2003-11-30', tz='utc')
+    END_DATE = pd.Timestamp('2003-12-08', tz='utc')
 
 
 class TestPositionPerformance(WithInstanceTmpDir, ZiplineTestCase):
@@ -1262,7 +1241,7 @@ class TestPositionPerformance(WithInstanceTmpDir, ZiplineTestCase):
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades_1, 2: trades_2}
         )
@@ -1359,7 +1338,7 @@ class TestPositionPerformance(WithInstanceTmpDir, ZiplineTestCase):
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
         txn = create_txn(self.asset1, trades[1].dt, 10.0, 1000)
@@ -1451,7 +1430,7 @@ class TestPositionPerformance(WithInstanceTmpDir, ZiplineTestCase):
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
         txn = create_txn(self.asset1, trades[1].dt, 10.0, 100)
@@ -1569,7 +1548,7 @@ single short-sale transaction"""
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
 
@@ -1802,7 +1781,7 @@ cost of sole txn in test"
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {3: trades}
         )
@@ -1922,7 +1901,7 @@ single short-sale transaction"""
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {3: trades}
         )
@@ -2168,7 +2147,7 @@ trade after cover"""
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
 
@@ -2257,7 +2236,7 @@ shares in position"
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
 
@@ -2386,7 +2365,7 @@ shares in position"
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             self.sim_params,
             {1: trades})
 
@@ -2414,9 +2393,7 @@ shares in position"
 class TestPositionTracker(WithTradingEnvironment,
                           WithInstanceTmpDir,
                           ZiplineTestCase):
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info([1, 2], pd.NaT, pd.NaT)
+    ASSET_FINDER_EQUITY_SIDS = 1, 2
 
     @classmethod
     def make_futures_info(cls):
@@ -2450,7 +2427,7 @@ class TestPositionTracker(WithTradingEnvironment,
 
         data_portal = create_data_portal_from_trade_history(
             self.env,
-            self.tmpdir,
+            self.instance_tmpdir,
             sim_params,
             {1: trades})
 

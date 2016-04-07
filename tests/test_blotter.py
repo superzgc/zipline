@@ -37,27 +37,29 @@ from zipline.protocol import BarData
 from zipline.testing.fixtures import (
     WithDataPortal,
     WithLogger,
+    WithSimParams,
     ZiplineTestCase,
 )
 
 
 class BlotterTestCase(WithLogger,
                       WithDataPortal,
+                      WithSimParams,
                       ZiplineTestCase):
-    SIM_PARAMS_START = pd.Timestamp('2006-01-05', tz='utc')
-    SIM_PARAMS_END = pd.Timestamp('2006-01-06', tz='utc')
+    START_DATE = pd.Timestamp('2006-01-05', tz='utc')
+    END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
     @classmethod
     def make_equity_info(cls):
         return pd.DataFrame.from_dict(
             {
                 24: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_END + timedelta(days=1),
+                    'start_date': cls.START_DATE,
+                    'end_date': cls.END_DATE + timedelta(days=1),
                 },
                 25: {
-                    'start_date': cls.SIM_PARAMS_START,
-                    'end_date': cls.SIM_PARAMS_END + timedelta(days=1),
+                    'start_date': cls.START_DATE,
+                    'end_date': cls.END_DATE + timedelta(days=1),
                 },
             },
             orient='index',
