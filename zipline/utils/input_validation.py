@@ -71,7 +71,10 @@ def ensure_upper_case(func, argname, arg):
         raise TypeError(
             "{0}() expected argument '{1}' to"
             " be a string, but got {2} instead.".format(
-                func.__name__, argname, arg,)
+                func.__name__,
+                argname,
+                arg,
+            ),
         )
 
 
@@ -128,6 +131,19 @@ def ensure_timezone(func, argname, arg):
             arg=arg,
         ),
     )
+
+
+def expect_non_empty(func, argname, arg):
+    if not len(arg):
+        raise ValueError(
+            "{0}() expected argname '{1}' to be a non-empty sequence but got"
+            " {2} instead.".format(
+                func.__name__,
+                argname,
+                arg,
+            ),
+        )
+    return arg
 
 
 def expect_dtypes(*_pos, **named):

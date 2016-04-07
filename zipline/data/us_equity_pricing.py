@@ -18,6 +18,7 @@ import operator as op
 from os import remove
 from os.path import exists
 import sqlite3
+import warnings
 
 from bcolz import (
     carray,
@@ -55,7 +56,13 @@ from six import (
 from toolz import valmap
 
 from zipline.utils.functional import unzip, apply
-from zipline.utils.input_validation import coerce_string, preprocess
+from zipline.utils.input_validation import (
+    coerce_string,
+    preprocess,
+    expect_element,
+    expect_non_empty,
+)
+from zipline.utils.preprocess import preprocess
 from zipline.utils.sqlite_utils import group_into_chunks
 from zipline.utils.memoize import lazyval
 from zipline.utils.cli import maybe_show_progress
@@ -111,13 +118,17 @@ def check_uint32_safe(value, colname):
         )
 
 
-def winsorise_uint32(df, column, *columns):
+@expect_element(invalid_data_behavior={'warn', 'raise', 'ignore'})
+@preprocess(columns=expect_non_empty)
+def winsorise_uint32(df, invalid_data_behavior, *columns):
     """Drops any record where a value would not fit into a uint32.
 
     Parameters
     ----------
     df : pd.DataFrame
         The dataframe to winsorise.
+    invalid_data_behavior : {'warn', 'raise', 'ignore'}
+        What to do when data is outside the bounds of a uint32.
     *columns : iterable[str]
         The names of the columns to check.
 
@@ -127,8 +138,14 @@ def winsorise_uint32(df, column, *columns):
         ``df`` with rows that contain values that do not fit into a uint32
         zeroed out.
     """
-    columns = (column,) + columns
-    df[(df[list(columns)] > UINT32_MAX).any(axis=1)] = 0
+    mask = (df[list(columns)] > UINT32_MAX).any(axis=1)
+    if mask.any():
+        if invalid_data_behavior == 'raise':
+            raise ValueError('Values out of bounds for uint32: %r' % df[mask])
+        if invalid_data_behavior == 'warn':
+            warnings.warn('Values out of bounds for uint32: %r' % df[mask])
+
+    df[mask] = 0
     return df
 
 
@@ -140,7 +157,7 @@ def ctable_from_dict(d, **bcolz_kwargs):
     return ctable(columns=columns, names=names, **bcolz_kwargs)
 
 
-def to_ctable(raw_data):
+def to_ctable(raw_data, invalid_data_behavior):
     if isinstance(raw_data, ctable):
         # we already have a ctable so do nothing
         return raw_data
@@ -151,7 +168,7 @@ def to_ctable(raw_data):
         check_uint32_safe(coldata.max() * 1000, colname)
         columns[colname] = coldata * 1000
 
-    winsorise_uint32(raw_data, 'volume', *OHLC)
+    winsorise_uint32(raw_data, invalid_data_behavior, 'volume', *OHLC)
     columns = valmap(op.methodcaller('astype', 'uint32'), columns)
     raw_data.index = dates = raw_data.index.values.astype('datetime64[s]')
     check_uint32_safe(dates.max().view(int), 'day')
@@ -195,7 +212,11 @@ class BcolzDailyBarWriter(object):
     def progress_bar_item_show_func(self, value):
         return value if value is None else str(value[0])
 
-    def write(self, data, assets=None, show_progress=False):
+    def write(self,
+              data,
+              assets=None,
+              show_progress=False,
+              invalid_data_behavior='warn'):
         """
         Parameters
         ----------
@@ -208,6 +229,9 @@ class BcolzDailyBarWriter(object):
             progress information.
         show_progress : bool
             Whether or not to show a progress bar while writing.
+        invalid_data_behavior : {'warn', 'raise', 'ignore'}
+            What to do when data is encountered that is outside the range of
+            a uint32.
 
         Returns
         -------
@@ -215,7 +239,7 @@ class BcolzDailyBarWriter(object):
             The newly-written table.
         """
         ctx = maybe_show_progress(
-            ((sid, to_ctable(df)) for sid, df in data),
+            ((sid, to_ctable(df, invalid_data_behavior)) for sid, df in data),
             show_progress=show_progress,
             item_show_func=self.progress_bar_item_show_func,
             label=self.progress_bar_message,
@@ -224,7 +248,10 @@ class BcolzDailyBarWriter(object):
         with ctx as it:
             return self._write_internal(it, assets)
 
-    def write_csvs(self, asset_map, show_progress=False):
+    def write_csvs(self,
+                   asset_map,
+                   show_progress=False,
+                   invalid_data_behavior='warn'):
         """Read CSVs as DataFrames from our asset map.
 
         Parameters
@@ -234,6 +261,9 @@ class BcolzDailyBarWriter(object):
             asset
         show_progress : bool
             Whether or not to show a progress bar while writing.
+        invalid_data_behavior : {'warn', 'raise', 'ignore'}
+            What to do when data is encountered that is outside the range of
+            a uint32.
         """
         read = partial(
             read_csv,
@@ -245,6 +275,7 @@ class BcolzDailyBarWriter(object):
             ((asset, read(path)) for asset, path in iteritems(asset_map)),
             assets=viewkeys(asset_map),
             show_progress=show_progress,
+            invalid_data_behavior=invalid_data_behavior,
         )
 
     def _write_internal(self, iterator, assets):

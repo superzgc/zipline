@@ -57,6 +57,7 @@ from zipline.testing import (
 )
 from zipline.testing.fixtures import (
     WithAdjustmentReader,
+    WithBcolzDailyBarReaderFromCSVs,
     WithDataPortal,
     ZiplineTestCase,
 )
@@ -337,7 +338,8 @@ class MockDailyBarSpotReader(object):
         return 100.0
 
 
-class PipelineAlgorithmTestCase(WithAdjustmentReader,
+class PipelineAlgorithmTestCase(WithBcolzDailyBarReaderFromCSVs,
+                                WithAdjustmentReader,
                                 ZiplineTestCase):
     AAPL = 1
     MSFT = 2
@@ -354,7 +356,6 @@ class PipelineAlgorithmTestCase(WithAdjustmentReader,
         )
 
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR = True
-    BCOLZ_DAILY_BAR_FROM_CSVS = True
 
     @classmethod
     def make_daily_bar_data(cls):

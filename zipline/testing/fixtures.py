@@ -526,10 +526,6 @@ class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
         when a test needs to use history, in which case this should be set to
         the largest history window that will be
         requested.
-    BCOLZ_DAILY_BAR_FROM_CSVS : bool
-        If this flag is set it is assumed that ``make_daily_bar_data`` will
-        return a dict mapping sid to filepath to csv data to be written with
-        the ``write_csvs`` method of a ``BcolzDailyBarWriter``.
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR : bool
         If this flag is set the ``bcolz_daily_bar_days`` will be the full
         set of trading days from the trading environment. This flag overrides
@@ -552,10 +548,10 @@ class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
     """
     BCOLZ_DAILY_BAR_PATH = 'daily_equity_pricing.bcolz'
     BCOLZ_DAILY_BAR_LOOKBACK_DAYS = 0
-    BCOLZ_DAILY_BAR_FROM_CSVS = False
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR = False
     BCOLZ_DAILY_BAR_START_DATE = alias('START_DATE')
     BCOLZ_DAILY_BAR_END_DATE = alias('END_DATE')
+    _write_method_name = 'write'
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -583,10 +579,18 @@ class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
         cls.bcolz_daily_bar_days = days
         cls.bcolz_daily_bar_ctable = t = getattr(
             BcolzDailyBarWriter(p, days),
-            'write_csvs' if cls.BCOLZ_DAILY_BAR_FROM_CSVS else 'write',
+            cls._write_method_name,
         )(cls.make_daily_bar_data())
 
         cls.bcolz_daily_bar_reader = BcolzDailyBarReader(t)
+
+
+class WithBcolzDailyBarReaderFromCSVs(WithBcolzDailyBarReader):
+    """
+    ZiplineTestCase mixin that provides cls.bcolz_daily_bar_reader from a
+    mapping of sids to CSV file paths.
+    """
+    _write_method_name = 'write_csvs'
 
 
 class WithBcolzMinuteBarReader(WithTradingEnvironment, WithTmpDir):
