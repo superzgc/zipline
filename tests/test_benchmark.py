@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from datetime import timedelta
-
 import numpy as np
 import pandas as pd
 
@@ -46,11 +44,11 @@ class TestBenchmark(WithDataPortal, WithSimParams, ZiplineTestCase):
             {
                 1: {
                     "start_date": cls.START_DATE,
-                    "end_date": cls.END_DATE + timedelta(days=1)
+                    "end_date": cls.END_DATE + pd.Timedelta(days=1)
                 },
                 2: {
                     "start_date": cls.START_DATE,
-                    "end_date": cls.END_DATE + timedelta(days=1)
+                    "end_date": cls.END_DATE + pd.Timedelta(days=1)
                 },
                 3: {
                     "start_date": pd.Timestamp('2006-05-26', tz='utc'),
@@ -58,7 +56,7 @@ class TestBenchmark(WithDataPortal, WithSimParams, ZiplineTestCase):
                 },
                 4: {
                     "start_date": cls.START_DATE,
-                    "end_date": cls.END_DATE + timedelta(days=1)
+                    "end_date": cls.END_DATE + pd.Timedelta(days=1)
                 },
             },
             orient='index',

@@ -48,22 +48,7 @@ class BlotterTestCase(WithLogger,
                       ZiplineTestCase):
     START_DATE = pd.Timestamp('2006-01-05', tz='utc')
     END_DATE = pd.Timestamp('2006-01-06', tz='utc')
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                24: {
-                    'start_date': cls.START_DATE,
-                    'end_date': cls.END_DATE + timedelta(days=1),
-                },
-                25: {
-                    'start_date': cls.START_DATE,
-                    'end_date': cls.END_DATE + timedelta(days=1),
-                },
-            },
-            orient='index',
-        )
+    ASSET_FINDER_EQUITY_SIDS = 24, 25
 
     @classmethod
     def make_daily_bar_data(cls):

@@ -1492,29 +1492,12 @@ class MinuteToDailyAggregationTestCase(WithBcolzMinuteBarReader,
     TRADING_ENV_MAX_DATE = END_DATE = pd.Timestamp(
         '2016-03-31', tz='UTC',
     )
+    ASSET_FINDER_EQUITY_SIDS = 1, 2
 
     minutes = pd.date_range('2016-03-15 9:31',
                             '2016-03-15 9:36',
                             freq='min',
                             tz='US/Eastern').tz_convert('UTC')
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                1: {
-                    'start_date': pd.Timestamp('2016-03-01', tz='UTC'),
-                    'end_date': pd.Timestamp('2016-03-31', tz='UTC'),
-                    'symbol': 'EQUITY1',
-                },
-                2: {
-                    'start_date': pd.Timestamp('2016-03-01', tz='UTC'),
-                    'end_date': pd.Timestamp('2016-03-31', tz='UTC'),
-                    'symbol': 'EQUITY2'
-                },
-            },
-            orient='index',
-        )
 
     @classmethod
     def make_minute_bar_data(cls):

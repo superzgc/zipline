@@ -118,21 +118,7 @@ class TestAPIShim(WithDataPortal, WithSimParams, ZiplineTestCase):
     END_DATE = pd.Timestamp("2016-01-28", tz='UTC')
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
 
-    sids = 1, 2, 3
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                sid: {
-                    "start_date": cls.SIM_PARAMS_START,
-                    "end_date": cls.SIM_PARAMS_END,
-                    "symbol": "ASSET{0}".format(sid),
-                }
-                for sid in cls.sids
-            },
-            orient='index',
-        )
+    sids = ASSET_FINDER_EQUITY_SIDS = 1, 2, 3
 
     @classmethod
     def make_minute_bar_data(cls):

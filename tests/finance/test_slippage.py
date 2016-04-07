@@ -47,24 +47,14 @@ class SlippageTestCase(WithSimParams, WithDataPortal, ZiplineTestCase):
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
     SIM_PARAMS_EMISSION_RATE = 'daily'
 
-    sids = 133,
+    ASSET_FINDER_EQUITY_SIDS = 133,
+    ASSET_FINDER_EQUITY_START_DATE = pd.Timestamp('2006-01-05', tz='utc')
+    ASSET_FINDER_EQUITY_END_DATE = pd.Timestamp('2006-01-07', tz='utc')
     minutes = pd.DatetimeIndex(
         start=START_DATE,
         end=END_DATE - pd.Timedelta('1 minute'),
         freq='1min'
     )
-
-    @classmethod
-    def make_equity_info(cls):
-        return pd.DataFrame.from_dict(
-            {
-                133: {
-                    'start_date': pd.Timestamp('2006-01-05', tz='utc'),
-                    'end_date': pd.Timestamp('2006-01-07', tz='utc')
-                }
-            },
-            orient='index',
-        )
 
     @classmethod
     def make_minute_bar_data(cls):

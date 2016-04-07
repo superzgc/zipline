@@ -769,16 +769,9 @@ class SyntheticBcolzTestCase(WithAdjustmentReader,
 
 
 class ParameterizedFactorTestCase(WithTradingEnvironment, ZiplineTestCase):
-    sids = Int64Index([1, 2, 3])
-
-    @classmethod
-    def make_equity_info(cls):
-        cls.equity_info = ret = make_simple_equity_info(
-            cls.sids,
-            start_date=Timestamp('2015-01-31', tz='UTC'),
-            end_date=Timestamp('2015-03-01', tz='UTC'),
-        )
-        return ret
+    sids = ASSET_FINDER_EQUITY_SIDS = Int64Index([1, 2, 3])
+    START_DATE = Timestamp('2015-01-31', tz='UTC')
+    END_DATE = Timestamp('2015-03-01', tz='UTC')
 
     @classmethod
     def init_class_fixtures(cls):

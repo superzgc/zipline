@@ -89,6 +89,12 @@ def make_simple_equity_info(sids,
             'exchange': 'TEST',
         },
         index=sids,
+        columns=(
+            'start_date',
+            'end_date',
+            'symbol',
+            'exchange',
+        ),
     )
 
 
