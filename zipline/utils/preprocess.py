@@ -176,16 +176,16 @@ def _build_preprocessed_function(func,
         varkw: '**',
     }
 
-    def argname(arg):
+    def name_as_arg(arg):
         return star_map.get(arg, '') + arg
 
     for arg, default in args_defaults:
         if default is NO_DEFAULT:
-            signature.append(argname(arg))
+            signature.append(name_as_arg(arg))
         else:
             default_name = default_name_template % defaults_seen
             exec_globals[default_name] = default
-            signature.append('='.join([argname(arg), default_name]))
+            signature.append('='.join([name_as_arg(arg), default_name]))
             defaults_seen += 1
 
         if arg in processors:
@@ -193,7 +193,7 @@ def _build_preprocessed_function(func,
             exec_globals[procname] = processors[arg]
             assignments.append(make_processor_assignment(arg, procname))
 
-        call_args.append(argname(arg))
+        call_args.append(name_as_arg(arg))
 
     exec_str = dedent(
         """\

@@ -178,7 +178,27 @@ def alias(attr_name):
     Returns
     -------
     p : classproperty
-        A class property that does the propert aliasing.
+        A class property that does the property aliasing.
+
+    Examples
+    --------
+    >>> class C(object):
+    ...     attr = 1
+    ...
+    >>> class D(object):
+    ...     attr_alias = alias('attr')
+    ...
+    >>> D.attr
+    1
+    >>> D.attr_alias
+    1
+    >>> class E(D):
+    ...     attr_alias = 2
+    ...
+    >>> E.attr
+    1
+    >>> E.attr_alias
+    2
     """
     return classproperty(flip(getattr, attr_name))
 
@@ -242,7 +262,7 @@ class WithAssetFinder(WithDefaultDateBounds):
         ``START_DATE``.
     ASSET_FINDER_EQUITY_END_DATE : datetime
         The default end date to create equity data for. This defaults to
-        ``END_DATE + pd.Timedelta(days=1)``.
+        ``END_DATE``.
 
     Methods
     -------
@@ -272,15 +292,10 @@ class WithAssetFinder(WithDefaultDateBounds):
     zipline.testing.make_future_info
     zipline.testing.make_commodity_future_info
     """
-    ASSET_FINDER_EQUITY_SIDS = tuple(map(ord, 'ABC'))
+    ASSET_FINDER_EQUITY_SIDS = ord('A'), ord('B'), ord('C')
     ASSET_FINDER_EQUITY_SYMBOLS = None
     ASSET_FINDER_EQUITY_START_DATE = alias('START_DATE')
-
-    @classproperty
-    def ASSET_FINDER_EQUITY_END_DATE(cls):
-        # add one day to end to make sure the asset exists through the end
-        # of the data
-        return cls.END_DATE + pd.Timedelta(days=1)
+    ASSET_FINDER_EQUITY_END_DATE = alias('END_DATE')
 
     @classmethod
     def _make_info(cls):
@@ -551,6 +566,8 @@ class WithBcolzDailyBarReader(WithTradingEnvironment, WithTmpDir):
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR = False
     BCOLZ_DAILY_BAR_START_DATE = alias('START_DATE')
     BCOLZ_DAILY_BAR_END_DATE = alias('END_DATE')
+    # allows WithBcolzDailyBarReaderFromCSVs to call the `write_csvs` method
+    # without needing to reimplement `init_class_fixtures`
     _write_method_name = 'write'
 
     @classmethod

@@ -28,7 +28,6 @@ from pandas import (
 )
 from six import iteritems, itervalues
 
-from zipline.assets.synthetic import make_simple_equity_info
 from zipline.algorithm import TradingAlgorithm
 from zipline.api import (
     attach_pipeline,
@@ -344,17 +343,10 @@ class PipelineAlgorithmTestCase(WithBcolzDailyBarReaderFromCSVs,
     AAPL = 1
     MSFT = 2
     BRK_A = 3
-    assets = AAPL, MSFT, BRK_A
-
-    @classmethod
-    def make_equity_info(cls):
-        return make_simple_equity_info(
-            cls.assets,
-            Timestamp('2014'),
-            Timestamp('2015'),
-            ('AAPL', 'MSFT', 'BRK_A'),
-        )
-
+    assets = ASSET_FINDER_EQUITY_SIDS = AAPL, MSFT, BRK_A
+    ASSET_FINDER_EQUITY_SYMBOLS = 'AAPL', 'MSFT', 'BRK_A'
+    START_DATE = Timestamp('2014')
+    END_DATE = Timestamp('2015')
     BCOLZ_DAILY_BAR_USE_FULL_CALENDAR = True
 
     @classmethod

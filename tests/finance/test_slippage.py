@@ -47,7 +47,7 @@ class SlippageTestCase(WithSimParams, WithDataPortal, ZiplineTestCase):
     SIM_PARAMS_DATA_FREQUENCY = 'minute'
     SIM_PARAMS_EMISSION_RATE = 'daily'
 
-    ASSET_FINDER_EQUITY_SIDS = 133,
+    ASSET_FINDER_EQUITY_SIDS = (133,)
     ASSET_FINDER_EQUITY_START_DATE = pd.Timestamp('2006-01-05', tz='utc')
     ASSET_FINDER_EQUITY_END_DATE = pd.Timestamp('2006-01-07', tz='utc')
     minutes = pd.DatetimeIndex(

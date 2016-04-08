@@ -133,19 +133,6 @@ def ensure_timezone(func, argname, arg):
     )
 
 
-def expect_non_empty(func, argname, arg):
-    if not len(arg):
-        raise ValueError(
-            "{0}() expected argname '{1}' to be a non-empty sequence but got"
-            " {2} instead.".format(
-                func.__name__,
-                argname,
-                arg,
-            ),
-        )
-    return arg
-
-
 def expect_dtypes(*_pos, **named):
     """
     Preprocessing decorator that verifies inputs have expected numpy dtypes.

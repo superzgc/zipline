@@ -60,9 +60,7 @@ from zipline.utils.input_validation import (
     coerce_string,
     preprocess,
     expect_element,
-    expect_non_empty,
 )
-from zipline.utils.preprocess import preprocess
 from zipline.utils.sqlite_utils import group_into_chunks
 from zipline.utils.memoize import lazyval
 from zipline.utils.cli import maybe_show_progress
@@ -119,8 +117,7 @@ def check_uint32_safe(value, colname):
 
 
 @expect_element(invalid_data_behavior={'warn', 'raise', 'ignore'})
-@preprocess(columns=expect_non_empty)
-def winsorise_uint32(df, invalid_data_behavior, *columns):
+def winsorise_uint32(df, invalid_data_behavior, column, *columns):
     """Drops any record where a value would not fit into a uint32.
 
     Parameters
@@ -138,12 +135,21 @@ def winsorise_uint32(df, invalid_data_behavior, *columns):
         ``df`` with rows that contain values that do not fit into a uint32
         zeroed out.
     """
+    columns = (column,) + columns
     mask = (df[list(columns)] > UINT32_MAX).any(axis=1)
     if mask.any():
         if invalid_data_behavior == 'raise':
-            raise ValueError('Values out of bounds for uint32: %r' % df[mask])
+            raise ValueError(
+                '%d values out of bounds for uint32: %r' % (
+                    mask.sum(), df[mask],
+                ),
+            )
         if invalid_data_behavior == 'warn':
-            warnings.warn('Values out of bounds for uint32: %r' % df[mask])
+            warnings.warn(
+                'Ignoring %d values because they are bounds for uint32: %r' % (
+                    mask.sum(), df[mask],
+                ),
+            )
 
     df[mask] = 0
     return df

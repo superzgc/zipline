@@ -1970,7 +1970,7 @@ class TestAccountControls(WithDataPortal, WithSimParams, ZiplineTestCase):
     START_DATE = pd.Timestamp('2006-01-03', tz='utc')
     END_DATE = pd.Timestamp('2006-01-06', tz='utc')
 
-    sidint, = ASSET_FINDER_EQUITY_SIDS = 133,
+    sidint, = ASSET_FINDER_EQUITY_SIDS = (133,)
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -2117,7 +2117,7 @@ class TestAccountControls(WithDataPortal, WithSimParams, ZiplineTestCase):
 class TestFutureFlip(WithSimParams, WithDataPortal, ZiplineTestCase):
     START_DATE = pd.Timestamp('2006-01-09', tz='utc')
     END_DATE = pd.Timestamp('2006-01-10', tz='utc')
-    sid, = ASSET_FINDER_EQUITY_SIDS = 1,
+    sid, = ASSET_FINDER_EQUITY_SIDS = (1,)
 
     @classmethod
     def make_daily_bar_data(cls):
@@ -2207,8 +2207,8 @@ class TestOrderCancelation(WithDataPortal,
     START_DATE = pd.Timestamp('2016-01-05', tz='utc')
     END_DATE = pd.Timestamp('2016-01-07', tz='utc')
 
-    ASSET_FINDER_EQUITY_SIDS = 1,
-    ASSET_FINDER_EQUITY_SYMBOLS = 'ASSET1',
+    ASSET_FINDER_EQUITY_SIDS = (1,)
+    ASSET_FINDER_EQUITY_SYMBOLS = ('ASSET1',)
 
     code = dedent(
         """\

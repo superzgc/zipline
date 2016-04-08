@@ -507,8 +507,8 @@ class ConstantInputTestCase(WithTradingEnvironment, ZiplineTestCase):
 
 class FrameInputTestCase(WithTradingEnvironment, ZiplineTestCase):
     asset_ids = ASSET_FINDER_EQUITY_SIDS = 1, 2, 3
-    start = ASSET_FINDER_EQUITY_START_DATE = Timestamp('2015-01-01', tz='utc')
-    end = ASSET_FINDER_EQUITY_END_DATE = Timestamp('2015-01-31', tz='utc')
+    start = START_DATE = Timestamp('2015-01-01', tz='utc')
+    end = END_DATE = Timestamp('2015-01-31', tz='utc')
 
     @classmethod
     def init_class_fixtures(cls):

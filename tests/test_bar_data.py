@@ -552,7 +552,7 @@ class TestDailyBarData(WithBarDataChecks,
 
     @classmethod
     def make_mergers_data(cls):
-        return pd.DataFrame([
+        return pd.DataFrame.from_records([
             {
                 'effective_date': str_to_seconds('2016-01-06'),
                 'ratio': 0.5,
@@ -567,7 +567,7 @@ class TestDailyBarData(WithBarDataChecks,
 
     @classmethod
     def make_dividends_data(cls):
-        return pd.DataFrame([
+        return pd.DataFrame.from_records([
             {
                 # only care about ex date, the other dates don't matter here
                 'ex_date':

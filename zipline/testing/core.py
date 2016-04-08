@@ -1245,17 +1245,21 @@ class _TmpBarReader(with_metaclass(ABCMeta, TempDirectory)):
     def __enter__(self):
         tmpdir = super(_TmpBarReader, self).__enter__()
         env = self._env
-        self._write(
-            env,
-            self._days,
-            tmpdir.path,
-            self._data,
-        )
-        return self._reader_cls(tmpdir.path)
+        try:
+            self._write(
+                env,
+                self._days,
+                tmpdir.path,
+                self._data,
+            )
+            return self._reader_cls(tmpdir.path)
+        except:
+            self.__exit__(None, None, None)
+            raise
 
 
 class tmp_bcolz_minute_bar_reader(_TmpBarReader):
-    """A reentrant temporary BcolzMinuteBarReader object.
+    """A temporary BcolzMinuteBarReader object.
 
     Parameters
     ----------
@@ -1263,7 +1267,7 @@ class tmp_bcolz_minute_bar_reader(_TmpBarReader):
         The trading env.
     days : pd.DatetimeIndex
         The days to write for.
-    data : dict[int -> pd.DataFrame]
+    data : iterable[(int, pd.DataFrame)]
         The data to write.
     path : str, optional
         The path to the directory to write the data into. If not given, this
@@ -1278,7 +1282,7 @@ class tmp_bcolz_minute_bar_reader(_TmpBarReader):
 
 
 class tmp_bcolz_daily_bar_reader(_TmpBarReader):
-    """A reentrant temporary BcolzDailyBarReader object.
+    """A temporary BcolzDailyBarReader object.
 
     Parameters
     ----------
